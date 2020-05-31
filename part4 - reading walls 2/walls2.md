@@ -32,7 +32,7 @@ for(let col = 0; col < 64; col++){
 }
 ```
 
-And it works!  Look at those nice textures.  Unforunately it's not so simple for Doom textures.  ROTT uses 64 * 64 indexed bitmaps but Doom is more sophisticated as it allows omitting certain data for better compression.
+And it works!  Look at those nice textures.  Unforunately it's not so simple for Doom textures.  ROTT uses 64 * 64 indexed bitmaps but Doom is more sophisticated as it allows omitting certain data for better compression. https://doomwiki.org/wiki/Picture_format
 
 Basically there's more metadata as Doom defines "posts" or verical columns of pixels.  These can have offsets and lengths and the empty space is considered transparent.
 
@@ -93,3 +93,4 @@ Updates
 
 - The asset switch is a little more precise with matching (for future updates) but it's not going to be able to work with both Doom and Rott without some updates to "inspect" the WAD to see which one it's for as they are both a little different.
 - Added index numbers to the lump display.
+- Added a wad-utils with stuff for dealing with WADs, only one function so far to read strings.
