@@ -10,7 +10,12 @@ void Init_Tables (void){
    //...stuff
 ```
 
-This means pallets are probably in lump "pal" and it matches the Doom `PLAYPAL` size, 768 bytes.  This now seems obvious in retrospect but when you're digging through 1000 lumps you don't see it.  Anyway we can wire this up using the same function as `PLAYPAL` and we get a preview.  Then we can change the wall texture rendering code to index into the pallet.
+This means pallets are probably in lump "pal" and it matches the Doom `PLAYPAL` size, 768 bytes.  This now seems obvious in retrospect but when you're digging through 1000 lumps you don't see it.  Anyway we can wire this up using the same function as `PLAYPAL` and we get a preview.  
+
+![Rott Pallet](rott-pallet.png)
+
+
+Then we can change the wall texture rendering code to index into the pallet.
 
 ```js
 //getWall()
@@ -31,6 +36,8 @@ for(let col = 0; col < 64; col++){
 	}
 }
 ```
+
+![Rott Wall](rott-wall.png)
 
 And it works!  Look at those nice textures.  Unforunately it's not so simple for Doom textures.  ROTT uses 64 * 64 indexed bitmaps but Doom is more sophisticated as it allows omitting certain data for better compression. https://doomwiki.org/wiki/Picture_format
 

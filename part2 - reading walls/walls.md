@@ -4,7 +4,7 @@ I'm going to modify our wad-reader component to show a preview of the wall when 
 
 For this we'll create a wad-asset file that will give us some sort of visual representation of the asset.  For a wall we need to get the chunk of data describing a wall and turn it into and image.  We do this by creating a canvas, pulling out the pixel image data, and then passing it back to append to the preview window.
 
-Walls should be in the Doom picture format (https://doomwiki.org/wiki/Picture_format) meaning that each byte represents a color in the 64x64 image.  What we don't know yet is where the pallet comes from.  So for this exercise let's just assign the 256 valus to the red color and see what happens.  Also note that everything is defined in columns, not rows as you may expect so you need to flip the coordinates to get it at the right orientation.
+Walls should be in a variant of the Doom picture format (https://doomwiki.org/wiki/Picture_format) meaning that each byte represents a color in the 64x64 image.  What we don't know yet is where the pallet comes from.  So for this exercise let's just assign the 256 values to the red color and see what happens.  Also note that everything is defined in columns, not rows as you may expect so you need to flip the coordinates to get it at the right orientation.
 
 ```js
 function getWall(dataView){
@@ -31,5 +31,7 @@ function getWall(dataView){
 ```
 
 This seems to get results that look reasonable.
+
+![wall textures](reading-walls-1.png)
 
 For the pallet, we need to dig around the source code but it should be roughly similar to the Doom colormap.  This is specified in the WAD itself as the colormap object. Doom used 34 maps but we can see the size is only 8192 bytes.  Divide this by 256 (the size of each color map) and we get an even 32.  So there are 32 color maps.
