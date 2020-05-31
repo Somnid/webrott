@@ -91,6 +91,8 @@ function getDoomImage(wad, dataView){
 }
 ```
 
+![Doom Door](doom-door.png)
+
 This function is pretty sloppy because I don't understand the data, like what columnOffset actually and what the top and left are.  I also could quite get columns with multiple spans working but if I did it would work for monster sprites too!  Anyway, it works for a most wall textures so I'm happy for now.
 
 Next time I'd like to get Doom sprites working and maybe clean up the interface a bit.  The constant scrolling for the preview is annoying, the table could use headers and it would be nice to have filesystem support so we don't have to load the WAD every time we test.
