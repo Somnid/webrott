@@ -3,11 +3,11 @@ Walls
 
 Now that we can read things from the WAD the first thing is to figure out if we can make something of the packed assets.  Probably the easiest place to start will be walls since they seem to have a simple format of 4096 bytes (64x64).  You may also have noticed that the WAD format uses 0 length entries to mark sections.  In this case we know all walls are between entries WALLSTRT and WALLSTOP.
 
-I'm going to modify our wad-reader component to show a preview of the wall when we click it.  I find that making these sorts of tools not only helps development down the line but makes it easier to chunk up a problem for testing before loading it up into a complex system.
+I'm going to modify our `wad-reader` component to show a preview of the wall when we click it.  I find that making these sorts of tools not only helps development down the line but makes it easier to chunk up a problem for testing before loading it up into a complex system.
 
-For this we'll create a wad-asset file that will give us some sort of visual representation of the asset.  For a wall we need to get the chunk of data describing a wall and turn it into and image.  We do this by creating a canvas, pulling out the pixel image data, and then passing it back to append to the preview window.
+For this we'll create a `wad-asset.js` file that will give us some sort of visual representation of the asset.  For a wall we need to get the chunk of data describing a wall and turn it into and image.  We do this by creating a canvas, pulling out the pixel image data, and then passing it back to append to the preview window.
 
-Walls should be in a variant of the Doom picture format (https://doomwiki.org/wiki/Picture_format) meaning that each byte represents a color in the 64x64 image.  What we don't know yet is where the pallet comes from.  So for this exercise let's just assign the 256 values to the red color and see what happens.  Also note that everything is defined in columns, not rows as you may expect so you need to flip the coordinates to get it at the right orientation.
+Walls should be in a variant of the Doom picture format (https://doomwiki.org/wiki/Picture_format) meaning that each byte represents a color in the 64x64 image (update: Walls are 64x64 bitmaps but _not_ Doom picture format).  What we don't know yet is where the pallet comes from.  So for this exercise let's just assign the 256 values to the red color and see what happens.  Also note that everything is defined in columns, not rows as you may expect so you need to flip the coordinates to get it at the right orientation.
 
 ```js
 function getWall(dataView){
