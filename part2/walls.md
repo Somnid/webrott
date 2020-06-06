@@ -37,4 +37,4 @@ This seems to get results that look reasonable.
 
 ![wall textures](reading-walls-1.png)
 
-For the pallet, we need to dig around the source code but it should be roughly similar to the Doom colormap.  This is specified in the WAD itself as the colormap object. Doom used 34 maps but we can see the size is only 8192 bytes.  Divide this by 256 (the size of each color map) and we get an even 32.  So there are 32 color maps.
+For the pallet, we need to dig around the source code but it should be roughly similar to the Doom pallet.  This is specified in the WAD itself as the PLAYPAL object. Doom also used used 34 colormaps but we can see the size of this lump is only 8192 bytes.  Divide this by 256 (the size of each color map) and we get an even 32.  So there are 32 color maps.
