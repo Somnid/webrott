@@ -42,7 +42,7 @@ for(let col = 0; col < 64; col++){
 
 ![Rott Wall](rott-wall.png)
 
-And it works!  Look at those nice textures.  Unforunately it's not so simple for Doom textures.  ROTT uses 64 * 64 indexed bitmaps but Doom is more sophisticated as it allows omitting certain data for better compression. https://doomwiki.org/wiki/Picture_format
+And it works!  Look at those nice textures.  Unforunately it's not so simple for Doom textures.  ROTT uses 64 * 64 indexed bitmaps but Doom is more sophisticated as it allows omitting certain data for better compression. https://doomwiki.org/wiki/Picture_format. Note that this format will come into play when we talk about ROTT's sprites.
 
 Basically there's more metadata as Doom defines "posts" or verical columns of pixels.  These can have offsets and lengths and the empty space is considered transparent.
 
