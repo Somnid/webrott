@@ -180,6 +180,12 @@ button.text-button {
 	justify-content: flex-start;
 	align-items: center;
 }
+.keyval {
+	display: flex;
+}
+.key {
+	font-weight: bold;
+}
 .error {
 	color: var(--negative-medium);
 	background: var(--negative-light);
