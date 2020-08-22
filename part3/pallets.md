@@ -102,3 +102,8 @@ Updates
 
 - The WAD Reader output is now a table so it's easier to read (and add fields if needed in the future).
 - We now add null ("\0") padding to the end of lump names when reading so you don't have to remember to do it yourself.
+
+Sources
+-------
+- https://doomwiki.org/wiki/PLAYPAL
+- https://doomwiki.org/wiki/COLORMAP

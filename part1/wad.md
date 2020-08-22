@@ -30,4 +30,10 @@ From here it's as simple as following the spec and reading the values and using 
 
 From here you can try reading some WADs like Doom shareware, Rise of the Triad shareware or any other custom and registered WADs you might have lying around and see what's in them.
 
-* WAD stands for Where's All the Data
+Notes
+-----
+- WAD stands for Where's All the Data
+
+Sources
+-------
+- https://doomwiki.org/wiki/WAD
