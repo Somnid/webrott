@@ -1,24 +1,9 @@
 import { getString, trimString } from "../lib/file-utils.js"
+import { writeBlockSequential, allocSquareBlock } from "../lib/array-utils.js";
 
 const mapSize = 64;
 const registeredLevelTag = 0x4344;
 const sharewareLevelTag = 0x4d4b;
-let x = 0; //16384
-
-function writeSequential(squareArray, index, value){
-	const row = Math.floor(index / squareArray.length);
-	const col = index % squareArray.length;
-	squareArray[row][col] = value;
-	x++;
-}
-
-function allocSquareArray(size){
-	const array = new Array(size);
-	for (let i = 0; i < size; i++) {
-		array[i] = new Array(size);
-	}
-	return array;
-}
 
 export class RtlFile {
 	constructor(arrayBuffer){
@@ -53,9 +38,9 @@ export class RtlFile {
 		const layers = new Array(3);
 
 		for(let layerIndex = 0; layerIndex < 3; layerIndex++){
-			const wallStart = map.planeStart[0];
-			const wallLength = map.planeLength[0];
-			const layer = allocSquareArray(128);
+			const wallStart = map.planeStart[layerIndex];
+			const wallLength = map.planeLength[layerIndex];
+			const layer = allocSquareBlock(128);
 
 			let byteIndex = wallStart;
 			let mapIndex = 0;
@@ -67,12 +52,12 @@ export class RtlFile {
 					byteIndex += 6;
 
 					for(let i = 0; i < count; i++){
-						writeSequential(layer, mapIndex, value);
+						writeBlockSequential(layer, mapIndex, value);
 						mapIndex++;
 					}
 				} else { //uncompressed data
 					byteIndex += 2;
-					writeSequential(layer, mapIndex, tag);
+					writeBlockSequential(layer, mapIndex, tag);
 					mapIndex++;
 				}
 			}

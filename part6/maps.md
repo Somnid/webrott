@@ -114,10 +114,84 @@ The first row contains data:
 - [0,1] is the height of sky (range: 90-97; 450-457) 
 - [0,2] indicates fog (104) or no fog (105)
 - [0,3] indicates if lights illuminate walls (139)
+- Any title with value 377 indicates level has a lightning effect (Seems to be a global value in the first row)
+- Any title with value 121 indicates a timer (the timer data is in the 3rd plane)
+
+### Layer 3 (Info)
+- Any tile with value high bits 0xba e.g. (value >> 8 === 0xba) indicates the music track.  The lower 8-bits are the track number.  If not present 0 is assumed.  If greater than the number of tracks the game crashes.
 
 The ranges are strange but it means it's easier to test you are reading data correctly.
 
-Note that all of this information comes from hacker.txt.
+### Timers
+
+Timers are split between 2 planes.  As noted above and tile with the value 121 in plane 2 will indicate there is a timer at the same location in plane 3.  In plane 3 the value of tile indicates a position where the first 8-bits are X and the second 8-bits are Y.  If you find that tile in layer 3 you get the actual timer start value.  Timer values are stored with the first 8-bits as minutes and the second 8-bits are seconds.  The location of the tiemr start value in other layers coorisponds to the thing that will be activated.  Timers also have a corrisponding end value.  This is placed to one side of the start value in the map grid.  First we look to the right to see if there is something in the tilemap (we haven't dealt with this yet), if so we check left, then up then down until a free space is found, that location contains the end time.  The end time is used to deactivate the thing.  For example in "The HUNT Begins" there is a timed door at space 80,59 that opens at 3:00 and locks again at 5:00.
+
+```js
+forEachBlock(this.map[1], (tile, row, col) => { //loop through all tiles in the layer
+	if(tile === 377){
+		lightning = true;
+	}
+	if(tile === 121){
+		const timerLocation = this.map[2][row][col];
+		const x = (timerLocation >> 8) & 0xff;
+		const y = timerLocation & 0xff;
+		const timerValue = this.map[2][y][x];
+		const minutes = (timerValue >> 8) & 0xff;
+		const seconds = timerValue & 0xff;
+		let endTime;
+		//This is not accurate, we actually need to look to see if the tilemap has data at the test location and if not it contains the timer.  We don't have a tilemap yet so this will probably do for now.
+		if(this.map[2][y][x+1]){
+			endTime = this.map[2][y][x+1];
+		} else if (this.map[2][y][x - 1]){
+			endTime = this.map[2][y][x-1];
+		} else if (this.map[2][y+1][x]){
+			endTime = this.map[2][y+1][x];
+		} else if (this.map[2][y-1][x]){
+			endTime = this.map[2][y-1][x];
+		} else {
+			throw new Error(`Can't find end timer for timer at location ${x},${y}`);
+		}
+		const endMinutes = (endTime >> 8) & 0xff;
+		const endSeconds = endTime & 0xff;
+		const li = document.createElement("li");
+		li.textContent = `X: ${x}, Y: ${y}, Start Time: ${String(minutes).padStart(2,0)}:${String(seconds).padStart(2,0)}, End Time: ${String(endMinutes).padStart(2,0)}:${String(endSeconds).padStart(2,0)}`;
+		this.dom.timers.appendChild(li);
+	}
+});
+```
+
+Note that all of this information is also detailed in hacker.txt.
+
+Checkpoint
+----------
+
+Using the shareware version, level 1, "The HUNT Begins" should have the following values:
+
+- Floor: 185
+- Ceiling: 235
+- Brightness: 222
+- Light Fade: 258
+- Height: 93
+- Sky Level: 97
+- No Fog
+- Light Sources enabled
+- Lightning
+- Music Track: 0
+- 1 Timere at 80,59 starting at 3:00 and ending at 5:00
+
+Level 2, "Foggy Mountain" should have the following values:
+
+- Floor: 182
+- Ceiling: 236
+- Brightness: 221
+- Light Fade: 259
+- Height: 93
+- Sky Level: 97
+- Fog (It's foggy mountain after all)
+- No light sources
+- No lightning
+- Music Track: 1
+- No timers
 
 Aside: Change Logs
 ------------------
@@ -137,3 +211,6 @@ Notes
 -----
 - TEd (Tile Editor) is id's tile map editor, created by John Romero.  ROTT uses TEd version 5.
 - While JS devs usually don't bother, because things have known lengths I preallocate my arrays with the array constructor
+- I also create array-utils.js that contains some helpers for dealing with the map block data
+
+So now we at least have all the map meta data.  Next time we might actually start getting a representation of the map.
