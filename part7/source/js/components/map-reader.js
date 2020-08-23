@@ -79,18 +79,23 @@ customElements.define("map-reader",
 					}
 				}
 				if(e.target.files.length === 2 && (extension === "wl1" || extension === "wl3" || extension == "wl6" || extension === "sdm" || extension === "sod")){
-					const headerArrayBuffer = await readFile(files[files.findIndex(f => getName(f.name) === "maphead")]);
-					const mapArrayBuffer = await readFile(files[files.findIndex(f => getName(f.name) === "gamemaps")]);
 
-					this.maphead = new MapHeadFile(headerArrayBuffer);
-					this.mapFile = new GameMapsFile(mapArrayBuffer);
+					const gameMapFile = files.find(f => {
+						const fileName = getName(f.name);
+						return fileName === "gamemaps" || fileName === "maptemp";
+					});
+
+					const camackCompressed = getName(gameMapFile.name) === "gamemaps";
+
+					const headerArrayBuffer = await readFile(files.find(f => getName(f.name) === "maphead"));
+					const mapArrayBuffer = await readFile(gameMapFile);
+
+					this.mapFile = new GameMapsFile(mapArrayBuffer, new MapHeadFile(headerArrayBuffer),  camackCompressed);
 
 					this.dom.entries.innerHTML = "";
 					let index = 0;
 
-					for(let offset of this.maphead.headerOffsets.filter(ho => ho !== 0)){
-						const map = this.mapFile.getMap(offset);
-
+					for(let map of this.mapFile.maps){
 						const thisIndex = index;
 						const tr = document.createElement("tr");
 						tr.addEventListener("click", () => this.loadMap(thisIndex, "wolf"));

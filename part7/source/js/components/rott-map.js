@@ -24,6 +24,9 @@ customElements.define("rott-map",
 			this.attachShadow({ mode: "open" });
 			this.shadowRoot.innerHTML = `
 				<link rel="stylesheet" href="css/system.css">
+				<style>
+					#canvas { image-rendering: pixelated; }
+				</style>
 				<div class="keyval">
 					<span class="key">Floor:</span>
 					<span class="value" id="floor"><span>
@@ -66,12 +69,12 @@ customElements.define("rott-map",
 				</div>
 				<div>Timers:</div>
 				<ul id="timers"></ul>
-				<table id="table"></table>
+				<canvas id="canvas"></canvas>
 			`;
 		}
 		cacheDom() {
 			this.dom = {
-				table: this.shadowRoot.querySelector("#table"),
+				canvas: this.shadowRoot.querySelector("#canvas"),
 				floor: this.shadowRoot.querySelector("#floor"),
 				ceiling: this.shadowRoot.querySelector("#ceiling"),
 				brightness: this.shadowRoot.querySelector("#brightness"),
@@ -147,6 +150,43 @@ customElements.define("rott-map",
 			});
 
 			this.dom.music.textContent = music ?? 0;
+
+			//draw the map
+			const mapSize = 128;
+			const context = this.dom.canvas.getContext("2d");
+			this.dom.canvas.width = mapSize;
+			this.dom.canvas.height = mapSize;
+			this.dom.canvas.style.width = `${mapSize * 4}px`;
+			this.dom.canvas.style.height = `${mapSize * 4}px`;
+
+			context.fillStyle = "#ffffff";
+			context.fillRect(0, 0, mapSize, mapSize);
+			const imageData = context.getImageData(0, 0, mapSize, mapSize);
+
+			for (let row = 0; row < mapSize; row++) {
+				for (let col = 0; col < mapSize; col++) {
+					if(col < 4 && row == 0) continue; //skip metadata
+
+					const value = this.map[0][row][col];
+
+					if(value > 89 || 
+						(value > 32 && value < 36) ||
+						(value === 44) ||
+						(value === 45) ||
+						(value === 0)){
+							continue; //skip these values for some reason
+						}
+
+					const pixelOffset = (row * mapSize * 4) + (col * 4);
+
+					imageData.data[pixelOffset + 0] = 0;
+					imageData.data[pixelOffset + 1] = 0;
+					imageData.data[pixelOffset + 2] = 0;
+					imageData.data[pixelOffset + 3] = 255;
+				}
+			}
+
+			context.putImageData(imageData, 0, 0);
 		}
 	}
 );
