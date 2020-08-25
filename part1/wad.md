@@ -32,7 +32,7 @@ From here you can try reading some WADs like Doom shareware, Rise of the Triad s
 
 Notes
 -----
-- WAD stands for Where's All the Data
+- WAD stands for "Where's All the Data"
 
 Sources
 -------
