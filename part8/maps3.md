@@ -32,7 +32,7 @@ Well now we have a map reader capable of reading lots of different TED maps.  I 
 
 ![bio-menace-sewer](bio-menace-sewers.png)
 
-Here we have the level `sewers` or as it seems to be called here `sewerntere`.  Not sure what the garbage on the level names is all about.  The image is hard to read but you can make out something that is clearly not random (and if you know a little bit about Bio Menace you can pick out features on the level silouettes).  If we had colors for the tiles rather than byte range checks this might be more interesting.
+Here we have the level `sewers` or as it seems to be called here `sewerntere`.  Not sure what extra characters on the level names is all about, maybe it's French.  The image is hard to read but you can make out something that is clearly not random (and if you know a little bit about Bio Menace you can pick out features on the level silouettes).  If we had colors for the tiles rather than byte range checks this might be more interesting.
 
 Anyway to prove we have something working let's look at the final level of Spear of Destiny:
 
