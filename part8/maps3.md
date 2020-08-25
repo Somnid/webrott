@@ -9,7 +9,7 @@ Carmack compression works like this (apparently Carmack stumbled onto LZW withou
 - If the high byte of the 16-bit value is `0xa7` or `0xa8` we are going to repeat a previous sequence.
 - For `0xa7`, the low byte is the length.  We read one more byte to get the offset.  So where the output index/pointer is at right now, count back `offset` *words* and then replay them onto the output buffer for `length`.
 - For `0xa8`, the low byte is the length but we read 2 more bytes.  This value is an offset from the start of the output sequence.  So from the beginning of the output add `offset` and then replay the sequence onto the output buffer for `length`.
-- If we need a value that natually has high byte `0xa7` or `0xa8` then we do a little trick.  Since repeat `0` has no meaning we can use it.  Take `[0x0,0xa7]` for instance.  When we see this we read one more byte.  This is the *lower* byte of the 16-bit value and `0xa7` is the high byte.
+- If we need a value that natually has high byte `0xa7` or `0xa8` then we do a little trick.  Since repeat `0` has no meaning we can use it.  Take `[0x0,0xa7]` for instance.  When we see this we read one more byte.  This new byte is the *lower* byte of the 16-bit value and `0xa7` is the high byte.
 
 This turned out to be hard.  Not because the algorithm is super hard but because it's easy to mess up and not very easy to tell what happened.  We can't reasonably manually walk through the whole thing because it's thousands of bytes long and as I found graph paper doesn't usually have space for 64 square in either orientation.  So while I could verify the first 100 or so bytes and they were reasonable, I kept getting infinite (or near infinite) loops and out of bounds reads and writes indicating something when very wrong.
 
@@ -28,7 +28,7 @@ For anyone implementing I encourage you to stick with the original 16-bit word s
 
 ---
 
-Well now we have a map reader capable of reading lots of different TED maps.  I even threw some Bio Menance in there for good measure and while the map render does really show much you can make out some correctness in the sillouette.  Unfortunately the Camackized versions don't seem to work correctly, not sure why but I didn't bother looking to closely for fear of getting too off track.  The Bio Menace folder also contains a `MAPTHEAD` file.  Supposedly this is the samething as a `MAPTEMP` but for the header file.  Though for some reason the `MAPHEAD` works with the `MAPTEMP` but not the `MAPTHEAD`.  Perhaps sometime I'll figure out why this is.
+Well now we have a map reader capable of reading lots of different TED maps.  I even threw some Bio Menance in there for good measure and while the map render doesn't really show much you can make out some correctness in the sillouette.  Unfortunately the Camackized versions don't seem to work correctly, not sure why but I didn't bother looking to closely for fear of getting too off track.  The Bio Menace folder also contains a `MAPTHEAD` file.  Supposedly this is the samething as a `MAPTEMP` but for the header file.  Though for some reason the `MAPHEAD` works with the `MAPTEMP` but not the `MAPTHEAD`.  Perhaps sometime I'll figure out why this is.
 
 Anyway to prove we have something working let's look at the final level of Spear of Destiny:
 
@@ -109,7 +109,7 @@ Notes:
 
 - `wolf-file.js` was renamed `ted-file.js` to signify the broader scope and fruits of our learning.  The inner parts of `ted-file.js` have been made more generic in case we support more types.
 - As I was working on Carmackization, I also refactored the code to pull out the RELW decompression function.  Now both operate directly on arraybuffers and return arraybuffers making them nicely generic.
-- I added more file extensions.  As I found out `.WJ1` and `.WJ6` exist for Japanese versions for Wolfenstien 3D, I don't know if these truly work as I don't have any to test but I don't see why they wouldn't.  In addition I found my copy of Spear of Destiny contained both `.SOD` and `.SD1` files which as far as I can tell have the same data.  There are also `.SD2` and `.SD3` which I think corrispond to the Spear of Destiny Mission Packs.  These don't load, which is odd and might be worth looking into.  These were not made by iD and have a few enhancements.  Not even sure if they are playable outside DOSBOX.
+- I added more file extensions.  As mentioned about to try out Bio Menace I added `.BM1`, `.BM2` and `.BM3` for the 3 episodes.  As I found out `.WJ1` and `.WJ6` exist for Japanese versions for Wolfenstien 3D, I don't know if these truly work as I don't have any to test but I don't see why they wouldn't.  In addition, I found my copy of Spear of Destiny contained both `.SOD` and `.SD1` files which as far as I can tell have the same data.  There are also `.SD2` and `.SD3` which I think corrispond to the Spear of Destiny Mission Packs.  These don't load, they buffer overrun which is odd and might be worth looking into.  These were not made by iD and have a few enhancements over stock Wolfenstien.  Not even sure if they are playable outside DOSBOX.
 
 Sources:
 -------
