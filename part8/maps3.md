@@ -30,6 +30,10 @@ For anyone implementing I encourage you to stick with the original 16-bit word s
 
 Well now we have a map reader capable of reading lots of different TED maps.  I even threw some Bio Menance in there for good measure and while the map render doesn't really show much you can make out some correctness in the sillouette.  Unfortunately the Camackized versions don't seem to work correctly, not sure why but I didn't bother looking to closely for fear of getting too off track.  The Bio Menace folder also contains a `MAPTHEAD` file.  Supposedly this is the samething as a `MAPTEMP` but for the header file.  Though for some reason the `MAPHEAD` works with the `MAPTEMP` but not the `MAPTHEAD`.  Perhaps sometime I'll figure out why this is.
 
+![bio-menace-sewer](bio-menace-sewers.png)
+
+Here we have the level `sewers` or as it seems to be called here `sewerntere`.  Not sure what the garbage on the level names is all about.  The image is hard to read but you can make out something that is clearly not random (and if you know a little bit about Bio Menace you can pick out features on the level silouettes).  If we had colors for the tiles rather than byte range checks this might be more interesting.
+
 Anyway to prove we have something working let's look at the final level of Spear of Destiny:
 
 ![sod-level-21](sod-level-21.png)
