@@ -10,7 +10,7 @@ export function writeBlockSequential(squareArray, index, value) {
 
 export function allocBlockArray(width, height) {
 	const array = new Array(height);
-	for (let i = 0; i < width; i++) {
+	for (let i = 0; i < height; i++) {
 		array[i] = new Array(width);
 	}
 	return array;

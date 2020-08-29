@@ -1,7 +1,7 @@
 Pallets
 =======
 
-While I couldn't figure out the base pallet for ROTT we can still talk about how they work in the WAD-based engine world.  For this, we can implement the Doom pallet system to our wad viewer.  Doom has a lump called "PLAYPAL" which contains 14 pallets of 256 colors each, with each color represented by 3 bytes (red, green, blue).  This represents all the colors in the game.
+While I couldn't figure out the base pallet for ROTT we can still talk about how they work in the WAD-based engine world.  For this, we can implement the Doom pallet system to our wad viewer.  Doom has a lump called `PLAYPAL` which contains 14 pallets of 256 colors each, with each color represented by 3 bytes (red, green, blue).  This represents all the colors in the game.
 
 Pallet 0 is the base pallet for Doom, while the others are used for special screen tinting purposes like the invulnerability (black and white), different levels of damage (red), radiation suit (green), and item pickups (yellow).  We show the maps with the following wad-asset code.
 
@@ -47,7 +47,7 @@ Here we can see the base Doom pallet:
 
 ![doom pallet](doom-pallet.png)
 
-This isn't how things are actually drawn though, before that we run them through the colormap. "COLORMAP" is a lump that defines 34 maps, each map is 256 bytes each representing an index into the current PLAYPAL pallet.  Color maps are mostly for lighting in the Doom engine with each map representing a different darkness level.  So as sector brightness changes as well as the distance from the player the colormap used becomes darker.  There are some other "hacks" used but this is the base of the system.  To show colormaps we need to know the pallet, so we get the "PLAYPAL" first.  For previewing we only need the base pallet so we won't worry about the other 13 for now.
+This isn't how things are actually drawn though, before that we run them through the colormap. `COLORMAP` is a lump that defines 34 maps, each map is 256 bytes each representing an index into the current `PLAYPAL` pallet.  Color maps are mostly for lighting in the Doom engine with each map representing a different darkness level.  So as sector brightness changes as well as the distance from the player, the colormap used becomes darker.  To show colormaps we need to know the pallet, so we get the `PLAYPAL` first.  For preview purposes we only need the base pallet so we won't worry about the other 13 for now.
 
 ```js
 function getColorMap(wad, dataView){
@@ -95,15 +95,15 @@ One of the darker colormaps:
 
 We sprinkle a few CSS styles to make the table boxes bigger (I chose 32px).  I also like the table format because we could do things like overlay the index in the future.
 
-ROTT also has color maps.  Without the base pallet we're not sure what to do with them yet.  However they also have special named maps like "TANMAP" and "PURPMAP" that seem to be used in special cases (I think the green map is used for gas for example).  The idea should be similar to what Doom is doing.  Next time we'll see if we can figure out the ROTT pallet and wire up the new color mapping to the wall asset display.  Perhaps we can try to see if we can load Doom textures (I though this would just work™ but something went wrong).
+ROTT also has color maps.  Without the base pallet we're not sure what to do with them yet.  However they also have special named maps like `TANMAP` and `PURPMAP` that seem to be used in special cases (I think the green map is used for gas traps for example).  The idea should be similar to what Doom is doing.  Next time we'll see if we can figure out the ROTT pallet and wire up the new color mapping to the wall asset display.  Perhaps we can try to see if we can load Doom textures (I though this would just work™ but something went wrong).
 
-Updates
--------
+Notes
+-----
 
 - The WAD Reader output is now a table so it's easier to read (and add fields if needed in the future).
 - We now add null ("\0") padding to the end of lump names when reading so you don't have to remember to do it yourself.
 
 Sources
 -------
-- https://doomwiki.org/wiki/PLAYPAL
-- https://doomwiki.org/wiki/COLORMAP
+- Doom Pallet: https://doomwiki.org/wiki/PLAYPAL
+- Doom Colormap: https://doomwiki.org/wiki/COLORMAP

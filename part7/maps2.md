@@ -156,15 +156,15 @@ That looks a lot like the first shareware level to me!
 
 Next time perhaps we'll look more a the maps and see if we can figure out the Carmack compression used in later versions of the Wolfenstien map format.
 
-Notes:
-------
+Notes
+-----
 
 - Wolfenstien maps are signed with TeD 5 version 1.0.
 - The Wolfenstien source has a variable called `tinf`, this confused me at first but I think it stands for "tileInfo"
 - rtl-map was renamed to rott-map
 - `wads` was renamed to `game-files` because I put Wolfenstien data there to play with.
 
-Sources:
+Sources
 -------
 
 - http://gaarabis.free.fr/_sites/specs/wlspec_index.html (Wolf3d File Specs)

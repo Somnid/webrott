@@ -1,7 +1,7 @@
 Walls
 =====
 
-Now that we can read things from the WAD the first thing is to figure out if we can make something of the packed assets.  Probably the easiest place to start will be walls since they seem to have a simple format of 4096 bytes (64x64).  You may also have noticed that the WAD format uses 0 length entries to mark sections.  In this case we know all walls are between entries WALLSTRT and WALLSTOP.
+Now that we can read things from the WAD the first thing is to figure out if we can make something of the packed assets.  Probably the easiest place to start will be walls since they seem to have a simple format of 4096 bytes (64x64).  You may also have noticed that the WAD format uses 0 length entries.  These are used to mark sections.  In this case we know all walls are between entries `WALLSTRT` and `WALLSTOP`.
 
 I'm going to modify our `wad-reader` component to show a preview of the wall when we click it.  I find that making these sorts of tools not only helps development down the line but makes it easier to chunk up a problem for testing before loading it up into a complex system.
 
@@ -37,4 +37,11 @@ This seems to get results that look reasonable.
 
 ![wall textures](reading-walls-1.png)
 
-For the pallet, we need to dig around the source code but it should be roughly similar to the Doom pallet.  This is specified in the WAD itself as the PLAYPAL object. Doom also used used 34 colormaps but we can see the size of this lump is only 8192 bytes.  Divide this by 256 (the size of each color map) and we get an even 32.  So there are 32 color maps.
+For the pallet, we need to dig around the source code but it should be roughly similar to a Doom pallet (https://doomwiki.org/wiki/PLAYPAL).  This is specified in the WAD itself as the PLAYPAL object. Doom also used 34 colormaps defined in the `COLORMAP` lump for lighting effects, but we can see the size of this lump is only 8192 bytes for ROTT.  Divide this by 256 (the size of each color map) and we get an even 32.  So there are 32 color maps.
+
+Sources
+-------
+
+- Doom Picture Format: https://doomwiki.org/wiki/Picture_format
+- Doom Pallet: https://doomwiki.org/wiki/PLAYPAL
+- Doom Colormap: https://doomwiki.org/wiki/COLORMAP

@@ -108,14 +108,14 @@ export function unCarmack(arraybuffer, byteLength) {
 
 I left the bail out in because, why not?  A partial result might be garbage but it's way better than an infinite or near infinite loop as that will freeze the UI, crash the tab and all sort of other annoying things.  I also stopped using post-increment notation as I found it actually made reading the code a little harder and caused a couple bugs.
 
-Notes:
-------
+Notes
+-----
 
 - `wolf-file.js` was renamed `ted-file.js` to signify the broader scope and fruits of our learning.  The inner parts of `ted-file.js` have been made more generic in case we support more types.
 - As I was working on Carmackization, I also refactored the code to pull out the RELW decompression function.  Now both operate directly on arraybuffers and return arraybuffers making them nicely generic.
 - I added more file extensions.  As mentioned about to try out Bio Menace I added `.BM1`, `.BM2` and `.BM3` for the 3 episodes.  As I found out `.WJ1` and `.WJ6` exist for Japanese versions for Wolfenstien 3D, I don't know if these truly work as I don't have any to test but I don't see why they wouldn't.  In addition, I found my copy of Spear of Destiny contained both `.SOD` and `.SD1` files which as far as I can tell have the same data.  There are also `.SD2` and `.SD3` which I think corrispond to the Spear of Destiny Mission Packs.  These don't load, they buffer overrun which is odd and might be worth looking into.  These were not made by iD and have a few enhancements over stock Wolfenstien.  Not even sure if they are playable outside DOSBOX.
 
-Sources:
+Sources
 -------
 
 - http://www.shikadi.net/moddingwiki/Carmack_compression

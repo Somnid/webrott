@@ -13,7 +13,7 @@ void Init_Tables (void){
    //...stuff
 ```
 
-This means pallets are probably in lump "pal" and it matches the Doom `PLAYPAL` size, 768 bytes.  This now seems obvious in retrospect but when you're digging through 1000 lumps you don't see it.  Anyway we can wire this up using the same function as `PLAYPAL` and we get a preview.  
+This means pallets are probably in lump `pal` and it matches the Doom `PLAYPAL` size, 768 bytes.  This now seems obvious in retrospect but when you're digging through 1000 lumps you don't see it.  Anyway, we can wire this up using the same function as `PLAYPAL` and we get a preview.  
 
 ![Rott Pallet](rott-pallet.png)
 
@@ -35,14 +35,14 @@ for(let col = 0; col < 64; col++){
 		imageData.data[pixelOffset] =  pallet.getUint8(palletOffset); //red
 		imageData.data[pixelOffset + 1] = pallet.getUint8(palletOffset + 1); //green
 		imageData.data[pixelOffset + 2] = pallet.getUint8(palletOffset + 2); //blue
-		imageData.data[pixelOffset + 3] = 255
+		imageData.data[pixelOffset + 3] = 255 //alpha
 	}
 }
 ```
 
 ![Rott Wall](rott-wall.png)
 
-And it works!  Look at those nice textures.  Unforunately it's not so simple for Doom textures.  ROTT uses 64 * 64 indexed bitmaps but Doom is more sophisticated as it allows omitting certain data for better compression. https://doomwiki.org/wiki/Picture_format. Note that this format will come into play when we talk about ROTT's sprites.
+And it works!  Look at those nice textures.  Unforunately, it's not so simple for Doom textures.  ROTT uses 64 * 64 indexed bitmaps but Doom is more sophisticated as it allows omitting certain data for better compression. https://doomwiki.org/wiki/Picture_format. Note that this format will come into play when we talk about ROTT's sprites.
 
 Basically there's more metadata as Doom defines "posts" or verical columns of pixels.  These can have offsets and lengths and the empty space is considered transparent.
 
@@ -96,13 +96,17 @@ function getDoomImage(wad, dataView){
 
 ![Doom Door](doom-door.png)
 
-This function is pretty sloppy because I don't understand the data, like what columnOffset is and what the top and left are.  I also couldn't quite get columns with multiple spans working but if I did it would work for monster sprites too!  Anyway, it works for most wall textures so I'm happy for now.
+This function is pretty sloppy because I don't understand the data, like what columnOffset is and what the top and left are.  I also couldn't quite get columns with multiple spans working but if I did it would work for monster sprites too!  Regaurdless, it works for most wall textures so I'm happy for now.
 
 Next time I'd like to get Doom sprites working and maybe clean up the interface a bit.  The constant scrolling for the preview is annoying, the table could use headers and it would be nice to have filesystem support so we don't have to load the WAD every time we test.
 
-Updates
--------
+Notes
+-----
 
 - The asset switch is a little more precise with matching (for future updates) but it's not going to be able to work with both Doom and Rott without some updates to "inspect" the WAD to see which one it's for as they are both a little different.
 - Added index numbers to the lump display.
-- Added a wad-utils with stuff for dealing with WADs, only one function so far to read strings.
+- Added a `wad-utils.js` with stuff for dealing with WADs, only one function so far to read strings.
+
+Sources
+-------
+- https://doomwiki.org/wiki/Picture_format

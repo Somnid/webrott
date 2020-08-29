@@ -81,26 +81,30 @@ customElements.define("doom-image",
 
 			for (let col = 0; col < this.width; col++) {
 				while (true) {
-					let rowStart = this.lump.getUint8(index);
-					if (rowStart === 255) { index++; break; } //consume the byte
+					const rowStart = this.lump.getUint8(index);
+					index += 1;
+					if (rowStart === 255) break;
 
-					const pixelCount = this.lump.getUint8(index + 1);
-					index += 2; //advance one more byte because of unused padding
+					const pixelCount = this.lump.getUint8(index);
+					index += 1; 
+					
+					//advance one more byte because of unused padding
+					index += 1;
 
 					//draw post spans
 					for (let row = rowStart; row < rowStart + pixelCount; row++) {
 						const pixelOffset = (row * this.width * 4) + (col * 4);
 						const palletIndex = this.lump.getUint8(index);
+						index += 1;
 						const palletOffset = palletIndex * 3;
 
 						imageData.data[pixelOffset] = pallet.getUint8(palletOffset); //red
 						imageData.data[pixelOffset + 1] = pallet.getUint8(palletOffset + 1); //green
 						imageData.data[pixelOffset + 2] = pallet.getUint8(palletOffset + 2); //blue
 						imageData.data[pixelOffset + 3] = 255;
-
-						index++;
 					}
-					index += 0; //advance one more byte because of unused padding
+
+					index += 1; //advance one more byte because of unused padding
 				}
 			}
 
