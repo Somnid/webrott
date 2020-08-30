@@ -1,65 +1,6 @@
-import { allocBlockArray } from "../lib/array-utils.js";
+import { allocBlockArray } from "../../../../shared/js/array-utils.js";
+import { getPallet, getTableImage } from "../../../../shared/js/image-utils.js";
 
-function getPallet(palletLump, length){
-	const pallet = new Array(length);
-	for (let i = 0; i < length; i++) {
-		pallet[i] = {
-			red: palletLump.getUint8((i * 3) + 0),
-			green: palletLump.getUint8((i * 3) + 1),
-			blue: palletLump.getUint8((i * 3) + 2),
-		}
-	}
-	return pallet;
-}
-function colorToHex(rgba) {
-	const red = parseInt(rgba.red).toString(16).padStart(2, "0")
-	const green = parseInt(rgba.green).toString(16).padStart(2, "0");
-	const blue = parseInt(rgba.blue).toString(16).padStart(2, "0");
-	const alpha = rgba.alpha ? parseInt(rgba.alpha).toString(16).padStart(2, "0") : "";
-	return "#" + red + green + blue + alpha;
-}
-function getTableImage(grid, pallet, showIndices = true){
-	const table = document.createElement("table");
-	if(showIndices){
-		const thead = document.createElement("thead");
-		for(let col = 0; col < grid[0].length + 1; col++){
-			const th = document.createElement("th");
-			if(col !== 0){
-				th.textContent = col - 1;
-			}
-			thead.appendChild(th);
-		}
-		table.appendChild(thead);
-	}
-	for (let row = 0; row < grid.length; row++) {
-		const tr = document.createElement("tr");
-
-		if(showIndices){
-			for (let col = 0; col < grid[0].length + 1; col++) {
-				const td = document.createElement("td");
-				if(col === 0){
-					td.textContent = row;
-					td.classList.add("index-col");
-				} else {
-					const color = pallet[grid[row][col - 1]];
-					td.style.backgroundColor = color !== undefined ? colorToHex(color) : "";
-				}
-				tr.appendChild(td);
-			}
-			table.appendChild(tr);
-		} else {
-			for (let col = 0; col < grid[0].length; col++) {
-				const td = document.createElement("td");
-				const color = pallet[grid[row][col]];
-				td.style.backgroundColor = color !== undefined ? colorToHex(color) : "";
-				tr.appendChild(td);
-			}
-			table.appendChild(tr);
-		}
-	}
-
-	return table;
-}
 
 customElements.define("table-pic",
 	class extends HTMLElement {
@@ -138,8 +79,8 @@ customElements.define("table-pic",
 				}
 			}
 
-			const palletLump = await fetch(this.palletsrc).then(x => x.arrayBuffer()).then(x => new DataView(x));
-			const pallet = getPallet(palletLump, 256);
+			const palletBuffer = await fetch(this.palletsrc).then(x => x.arrayBuffer());
+			const pallet = getPallet(palletBuffer, 256);
 			const table = getTableImage(grid, pallet);
 			this.shadowRoot.appendChild(table);
 		}

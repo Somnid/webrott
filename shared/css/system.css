@@ -43,7 +43,7 @@
 	display: block;
 	visibility: hidden;
 }
-body,html {
+body,html,:host {
 	margin : 0;
 	padding: 0;
 	font-family: arial;

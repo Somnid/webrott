@@ -5,26 +5,47 @@ const numMaps = 100;
 
 export class VswapFile {
 	constructor(arrayBuffer){
-		this.dataView = new DataView(arrayBuffer);
+		this.arrayBuffer = arrayBuffer;
+		this.dataView = new DataView(this.arrayBuffer);
 		this.chunksInFile = this.dataView.getUint16(0, true);
 		this.spriteStart = this.dataView.getUint16(2, true);
 		this.soundStart = this.dataView.getUint16(4, true);
 		
-		this.offsets = new Array(this.chunksInFile);
-		this.lengths = new Array(this.chunksInFile);
+		const offsets = new Array(this.chunksInFile);
+		const lengths = new Array(this.chunksInFile);
 		let index = 6;
 
 		for(let i = 0; i < this.chunksInFile; i++){
-			this.offsets[i] = this.dataView.getUint32(index, true);
+			offsets[i] = this.dataView.getUint32(index, true);
 			index += 4;
 		}
 		for (let i = 0; i < this.chunksInFile; i++) {
-			this.lengths[i] = this.dataView.getUint16(index, true);
+			lengths[i] = this.dataView.getUint16(index, true);
 			index += 2;
+		}
+
+		this.entries = new Array(this.chunksInFile);
+		for(let i = 0; i < this.chunksInFile; i++){
+			let type;
+			if(i < this.spriteStart){
+				type = "wall";
+			} else if(i >= this.spriteStart && i < this.soundStart){
+				type = "sprite";
+			} else if(i >= this.soundStart){
+				type = "sound";
+			}
+
+			this.entries[i] = {
+				offset: offsets[i],
+				size: lengths[i],
+				type
+			};
 		}
 	}
 	getAsset(index){
-		
+		const offset = this.entries[index].offset;
+		const length = this.entries[index].size;
+		return this.arrayBuffer.slice(offset, offset + length);
 	}
 }
 

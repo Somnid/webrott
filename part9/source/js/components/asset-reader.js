@@ -1,5 +1,6 @@
 import { Wad } from "../lib/wad.js";
-import { loadAsset } from "../lib/wad-asset.js";
+import { loadAsset as loadWadAsset } from "../lib/wad-asset.js";
+import { loadAsset as loadTedAsset } from '../lib/ted-asset.js';
 import { readFile, getExtension, getName } from "../lib/file-utils.js";
 import { VswapFile } from "../lib/ted-file.js";
 
@@ -25,7 +26,7 @@ customElements.define("asset-reader",
 		render(){
 			this.attachShadow({ mode: "open" });
 			this.shadowRoot.innerHTML = `
-				<link rel="stylesheet" href="css/system.css">
+				<link rel="stylesheet" href="../../shared/css/system.css">
 				<style>
 					:host{ display: grid; grid-template-columns: 50% 50%; grid-template-rows: 45px minmax(0, calc(100% - 45px)); height: 100%; grid-template-areas: "input input" "list preview"; }
 					#entries-container { grid-area: list; cursor: pointer; overflow-y: auto; }
@@ -87,38 +88,38 @@ customElements.define("asset-reader",
 					this.asset = new VswapFile(arrayBuffer);
 
 					this.dom.entries.innerHTML = "";
-					let index = 1;
+					let index = 0;
 
-					/*
 					for (let entry of this.asset.entries) {
 						const tr = document.createElement("tr");
-						tr.addEventListener("click", () => this.loadAsset(entry.name));
+						const i = index;
+						tr.addEventListener("click", () => this.loadAsset(i, "vswap", entry.type).bind(index));
 						const indexCell = document.createElement("td");
 						indexCell.textContent = index;
-						const nameCell = document.createElement("td");
-						nameCell.textContent = entry.name;
+						const typeCell = document.createElement("td");
+						typeCell.textContent = entry.type;
 						const offsetCell = document.createElement("td");
 						offsetCell.textContent = entry.offset;
 						const sizeCell = document.createElement("td");
 						sizeCell.textContent = entry.size;
 
 						tr.appendChild(indexCell);
-						tr.appendChild(nameCell);
+						tr.appendChild(typeCell);
 						tr.appendChild(offsetCell);
 						tr.appendChild(sizeCell);
 
 						this.dom.entries.appendChild(tr);
 						index++;
-					}*/
+					}
 				}
 			});
 		}
-		loadAsset(name, type){
+		loadAsset(name, fileType, assetType){
 			this.dom.preview.innerHTML = "";
-			if(type === "wad"){
-				this.dom.preview.appendChild(loadAsset(this.asset, name));
-			} else if (type === "vswap"){
-				this.dom.preview.appendChild(loadAsset(this.asset, name));
+			if(fileType === "wad"){
+				this.dom.preview.appendChild(loadWadAsset(this.asset, name));
+			} else if (fileType === "vswap"){
+				this.dom.preview.appendChild(loadTedAsset(this.asset, name, assetType));
 			}
 		}
 		attributeChangedCallback(name, oldValue, newValue){
