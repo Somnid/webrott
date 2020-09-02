@@ -1,5 +1,5 @@
-Walls Part 2
-============
+Walls Part 2: We Have Color
+===========================
 
 After much digging in the ROTT source code I found by checking references for `colormap` that is is assigned to by an object called `origpal` (which sounds like what we want). That the pallet is loaded in `RT_MAIN.C`.
 

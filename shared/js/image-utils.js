@@ -1,12 +1,12 @@
-export function getPallet(palletBuffer, length) {
+export function getPallet(palletBuffer, length, scale = 1) {
 	const pallet = new Array(length);
 	const dataView = new DataView(palletBuffer);
 
 	for (let i = 0; i < length; i++) {
 		pallet[i] = [
-			dataView.getUint8((i * 3) + 0),
-			dataView.getUint8((i * 3) + 1),
-			dataView.getUint8((i * 3) + 2),
+			dataView.getUint8((i * 3) + 0) * scale,
+			dataView.getUint8((i * 3) + 1) * scale,
+			dataView.getUint8((i * 3) + 2) * scale,
 		];
 	}
 	return pallet;
@@ -19,7 +19,10 @@ export function colorToHex(rgb) {
 	return "#" + red + green + blue;
 }
 
-export function getTableImage(grid, pallet, showIndices = true) {
+export function getTableImage(grid, pallet, options = {}) {
+	const showIndices = options.showIndices ?? true;
+	const mapFunc = options.mapFunc ?? (x => x);
+
 	const table = document.createElement("table");
 	if (showIndices) {
 		const thead = document.createElement("thead");
@@ -37,22 +40,24 @@ export function getTableImage(grid, pallet, showIndices = true) {
 
 		if (showIndices) {
 			for (let col = 0; col < grid[0].length + 1; col++) {
-				const td = document.createElement("td");
+				let td = document.createElement("td");
 				if (col === 0) {
 					td.textContent = row;
 					td.classList.add("index-col");
 				} else {
 					const color = pallet[grid[row][col - 1]];
 					td.style.backgroundColor = color !== undefined ? colorToHex(color) : "";
+					td = mapFunc(td, row, col, color, grid[row][col - 1]);
 				}
 				tr.appendChild(td);
 			}
 			table.appendChild(tr);
 		} else {
 			for (let col = 0; col < grid[0].length; col++) {
-				const td = document.createElement("td");
+				let td = document.createElement("td");
 				const color = pallet[grid[row][col]];
 				td.style.backgroundColor = color !== undefined ? colorToHex(color) : "";
+				td = mapFunc(td, row, col, color, grid[row][col - 1]);
 				tr.appendChild(td);
 			}
 			table.appendChild(tr);

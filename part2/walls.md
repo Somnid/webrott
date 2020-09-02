@@ -1,5 +1,5 @@
-Walls
-=====
+Reading Walls: A First Attempt
+==============================
 
 Now that we can read things from the WAD the first thing is to figure out if we can make something of the packed assets.  Probably the easiest place to start will be walls since they seem to have a simple format of 4096 bytes (64x64).  You may also have noticed that the WAD format uses 0 length entries.  These are used to mark sections.  In this case we know all walls are between entries `WALLSTRT` and `WALLSTOP`.
 

@@ -1,5 +1,5 @@
-Walls 3
-=======
+Reading Walls 3: Wolfenstien
+============================
 
 Etch-a-sketch maps are cool but I think it's time to add a little bit more.  Going further will likely require merging the functionality of map-reader and wad-reader so that we can add the visuals.  But as a baby step let's keep going with Wolfenstien, after all this is going to be the easy case.  To get Wolfenstien assets we need to look into `VSWAP.{ext}`.
 
@@ -24,6 +24,8 @@ We can lay these out in a table like we did with the WAD.  First we'll do the wa
 
 ![wolf-pallet](wolf-pallet.png)
 
+The final purple color indicates transparency and is not actually displayed but I have yet to see a place where it's used.
+
 The extractor also dumps out the colors as an array of 3-value tuples, which is how we'll represent colors internally.  We just copy and paste this into the `wolf-utils.js` file.  The results:
 
 ![wolf-brick-normal](wolf-brick-normal.png)
@@ -34,7 +36,7 @@ Each wall has 2 variants a normal and dark one and they are right next to each o
 Refactor with internal formats
 ------------------------------
 
-Along with the visual aids described below, it became obvious we can start simplifying.  Right now we have `rott-image`, `doom-image` and `rott-wall`.  Rather than add another `wolf-wall` and `wolf-image` it makes more sense to start carrying around these things in a standard representation.  The new `index-bitmap` will take care of rendering anything in this format.  To keep it simply images will be a 2D array of rows, then columns.  Each value in the array will be an index and you must also give `index-bitmap` the pallet.  We can have other renderers too.  For example, the `pallet-extractor` and `TROOA1.html` output as tables instead so we get nice gridlines and can overlay data.
+Along with the visual aids described below, it became obvious we can start simplifying.  Right now we have `rott-image`, `doom-image` and `rott-wall`.  Rather than add another `wolf-wall` and `wolf-image` it makes more sense to start carrying around these things in a standard representation.  The new `index-bitmap` will take care of rendering anything in this format.  To keep it simple, images will be a 2D array of rows, then columns.  Each value in the array will be an index and you must also give `index-bitmap` the pallet.  We can have other renderers too.  For example, the `pallet-extractor` and `TROOA1.html` output as tables instead so we get nice gridlines and can overlay data.
 
 Pallets too will get their own format which is a single array of 3-value tuples as explained above.  Then we can combine all the image custom elements and just worry about the algorithms to unpack them.
 
@@ -43,7 +45,7 @@ For now, I'm just using normal arrays but it's likely they could switch to Uint8
 Aside: Visual Aids
 ------------------
 
-I create a visual aide for sprites located in `visual-aids` directory.  This was mainly copying the `doom-image` code and instead of exporting a canvas image, I built it into a table where I can add overlays and other fancy stuff if necessary.  That component is called `table-pic`. To make things simpler I also exported the binary lumps for the `PLAYPAL` pallets and `TROOA1` image.  `table-pic` take in the url of both as attributes and fetches them.  It then renders the image and adds handy guides and indicies to make it easier to follow.
+I create a visual aide for sprites located in `visual-aids` directory.  This was mainly copying the `doom-image` code and instead of exporting a canvas image, I built it into a table where I can add overlays and other fancy stuff if necessary.  That component is called `table-pic`. To make things simpler I also exported the binary lumps for the `PLAYPAL` pallets and `TROOA1` image.  `table-pic` takes in the url of both as attributes and fetches them.  It then renders the image and adds handy guides and indicies to make it easier to follow.
 
 I'll probably start doing some more visual aides but I'm not sure what exactly.  Probably anything I, myself, have trouble visualizing, especially when I come back to it.
 
@@ -69,6 +71,7 @@ Notes:
 - `allocBlockArray` had a bug reading from the wrong dimension.  Since the previous blocks were square it didn't matter but I fixed it while making the visual aids for images.  I also added the ability to preallocate a default value.
 - `ted-asset.js` was added.  This contains functions for taking ted style assets and converting them into useful intermediate formats.
 - I created `image-utils.js`.  This currently contains the code to take a index bitmap and convert it to an canvas image.
+- `wolf-utils.js` has utilites for Wolfenstien files.  Right now that's just the pallet.
 
 Sources:
 -------

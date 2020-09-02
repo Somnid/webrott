@@ -1,5 +1,5 @@
-Maps Part 2
-===========
+Maps Part 2: Wolfenstien
+========================
 
 Out of curiosity I wanted to find out how close the ROTT level format is to Wolfenstien 3D.  So let's look at that.
 

@@ -21,7 +21,9 @@
 	--checker: linear-gradient(45deg, #eee 25%, transparent 25%),
 	  linear-gradient(-45deg, #eee 25%, transparent 25%),
 	  linear-gradient(45deg, transparent 75%, #eee 75%),
-      linear-gradient(-45deg, transparent 75%, #eee 75%);
+	  linear-gradient(-45deg, transparent 75%, #eee 75%);
+	
+	--shadow-1: 1px 1px 3px rgba(0,0,0,0.5);
 }
 
 @media (prefers-color-scheme: dark){
@@ -43,14 +45,18 @@
 	display: block;
 	visibility: hidden;
 }
-body,html,:host {
+:host,body,html
+ {
+	position: relative;
 	margin : 0;
 	padding: 0;
 	font-family: arial;
 	font-size: 100%;
-	background-color: var(--background);
 	color: var(--text);
+}
+body,html {
 	block-size: 100%;
+	background-color: var(--background);
 }
 label, button, textarea, input {
 	display: block;
@@ -183,7 +189,7 @@ button.text-button {
 .keyval {
 	display: flex;
 }
-.key {
+.keyval .key {
 	font-weight: bold;
 }
 .error {

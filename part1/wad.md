@@ -1,5 +1,5 @@
-WAD
-===
+The WAD Format
+==============
 
 The first thing we'll do is try to understand the asset format.  This will be useful because if we can get the assets we can do all sorts of fun things with them.  Rise of the Triad uses the WAD format which was invented for Doom.  It contains many types of assets packed up into a single file, kinda like a primative zip archive or tarball file.  It consists of a bunch of "lumps" which represent an asset of some sort.  The overall structure is pretty simple and explained here: https://doomwiki.org/wiki/WAD.  The format is basically a header, a big block of binary data and then a table with names and such for the data at the end (we use the offset in the header to jump to the table).  The table has as many entries as their are lumps and each entry points to where in the file the data is located and its size.
 

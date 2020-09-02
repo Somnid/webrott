@@ -1,5 +1,5 @@
-Maps Part 3
-===========
+Maps Part 3: Carmack Compression
+================================
 
 We left off before looking at Carmack compression. Let's see if we can do that now with `GAMEMAPS.WL1`.
 
