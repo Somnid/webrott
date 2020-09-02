@@ -16,7 +16,7 @@ offsets (chunksInFile * 32-bits)
 lengths (chunksInFile * 16-bits)
 ```
 
-`chunksInFile` is the number of assets with a "chunk" being similar to a WAD "lump."  `spriteStart` and `soundStart` are indexs that tell us where the data of each type starts.  Note that there are actually 3 types: wall, sprite and sound.  Walls start immediate after the header and we can tell this because all the data from 0 to `spriteStart` has a length of 4096 (64*64 bitmap).  So let's say I want index `234`: if 234 > `spriteStart` but less than `soundStart` I know it's a sprite.  
+`chunksInFile` is the number of assets with a "chunk" being similar to a WAD "lump."  `spriteStart` and `soundStart` are indicies that tell us where the data of each type starts.  Note that there are actually 3 types: wall, sprite and sound.  Walls start immediate after the header and we can tell this because all the data from 0 to `spriteStart` has a length of 4096 (64*64 bitmap).  So let's say I want index `234`: if 234 > `spriteStart` but less than `soundStart` I know it's a sprite.  
 
 Next are the 2 arrays with length and offsets, not unlike how planes were defined in the `GAMEMAP` file.  There are `chunksInFile` entries for each and each corrisponds to it's offset and length in the file.  With this we know the location, length and type of each entry.
 
@@ -67,7 +67,7 @@ This operates on `DataViews`s which is why there's some extra offsetting.  A dat
 Notes:
 ------
 
-- For some reason my `doom-image` component got corrupted and was never working in all chapters.Remember when I said had to skip over the padding bytes? Apparently it never made it to the repo.
+- For some reason my `doom-image` component got corrupted and was never working in all chapters. Remember when I said had to skip over the padding bytes? Apparently it never made it to the repo.
 - `allocBlockArray` had a bug reading from the wrong dimension.  Since the previous blocks were square it didn't matter but I fixed it while making the visual aids for images.  I also added the ability to preallocate a default value.
 - `ted-asset.js` was added.  This contains functions for taking ted style assets and converting them into useful intermediate formats.
 - I created `image-utils.js`.  This currently contains the code to take a index bitmap and convert it to an canvas image.
