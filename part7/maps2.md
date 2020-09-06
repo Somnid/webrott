@@ -146,7 +146,7 @@ We're going to do the same things for ROTT.  However, we'll need to skip the fir
 - \>89, 33-35, 44, 45, 0: These are not walls
 - <=32: These do something special, not sure what yet
 - 76-79: These do something special with elevators (at different orientations), and set data in layer 3.
-- 47,48: Not sure what these do but the set some data in layer 3.
+- 47,48: Not sure what these do but they set some data in layer 3.
 
 The rest are walls of some sort.  We can apply black pixels to all other values and this is what we get:
 
