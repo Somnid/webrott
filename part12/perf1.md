@@ -94,7 +94,7 @@ There's always more we can do.  We can parallize rendering walls with more worke
 Researching Blake Stone
 -----------------------
 
-I also did a little research which might be used for a later post.  Basically I wanted to see if I could view Blake Stone assets.  It sort of works but the pallet is off.  Going through a lot of resources it turns out the palette is embedded in the exe itself and unlike Wolfenstien it's not included in the offical source release.  You can find it laid out in some source ports, but that kinda feels like cheating.  I wanted to make a utility that could scan for the pallet block in the binary data.  The gist is let's see if we can just find pattern 0,0,0 (black) followed by something else that looks like a gray color 3-repeating bytes.  Turns out there aren't any and this is because the exe itself is compressed with a utility called LZEXE.  It looks like if we want to try this out we'll need a way to unpack the exe (there's another program called UNLZEXE and it might make sense to make an implementation for ourselves).
+I also did a little research which might be used for a later post.  Basically I wanted to see if I could view Blake Stone assets.  It sort of works but the pallet is off.  Going through a lot of resources it turns out the palette is embedded in the exe itself and unlike Wolfenstien it's not included in the offical source release.  You can find it laid out in some source ports, but that kinda feels like cheating.  I wanted to make a utility that could scan for the pallet block in the binary data.  The gist is let's see if we can just find pattern 0,0,0 (black) followed by something else that looks like a gray color (3-repeating bytes) and so on to see if we can just manually find the offset.  Turns out there aren't any and this is because the exe itself is compressed with a utility called LZEXE.  It looks like if we want to try this out we'll need a way to unpack the exe (there's another program called UNLZEXE and it might make sense to make an implementation for ourselves).
 
 This post is lacking pictures.  So here's what currently happens with the hardcoded Wolfenstien palette:
 
@@ -104,3 +104,5 @@ Souces
 ------
 
 - https://github.com/GoogleChromeLabs/comlink
+- https://github.com/mywave82/unlzexe/blob/master/unlzexe.c
+- http://www.shikadi.net/moddingwiki/LZW_Compression
