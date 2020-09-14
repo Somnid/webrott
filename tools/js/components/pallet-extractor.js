@@ -26,14 +26,18 @@ customElements.define("pallet-extractor",
 			this.shadowRoot.innerHTML = `
 				<link rel="stylesheet" href="../shared/css/system.css">
 				<style>
-					#pallet table td { width: 16px; height: 16px; }
+					.pallet-container { display: grid; grid-template-columns: max-content; }
+					.pallet-container table { grid-column: 1 / 1; grid-row: 1 / 1; }
+					.pallet-container textarea { grid-column: 2 / 3; grid-row: 1 / 1; }
+					.pallet-container table td { width: 16px; height: 16px; }
+					
 				</style>
-				<label for="file">Select Wolfenstien 3D GAMEPAL.obj:</label>
+				<label for="file">Select GAMEPAL.obj or decompressed EXE:</label>
 				<input id="file" type="file" />
 				<div id="pallet"></div>
 				<div id="output"></div>
 			`;
-		}
+		}//251471
 		cacheDom() {
 			this.dom = {
 				file: this.shadowRoot.querySelector("#file"),
@@ -45,39 +49,51 @@ customElements.define("pallet-extractor",
 			this.dom.file.addEventListener("change", async e => {
 				const file = e.target.files[0];
 				const arrayBuffer = await readFile(file);
+				const start = performance.now();
 
-				if(getExtension(file.name) === "obj"){
-					const dataView = new DataView(arrayBuffer, 119); //Found this via inspection
-					const pallet = new Array(256);
-					for (let i = 0; i < 256; i++) {
-						pallet[i] = [
-							dataView.getUint8(i * 3) << 2,
-							dataView.getUint8((i * 3) + 1) << 2,
-							dataView.getUint8((i * 3) + 2) << 2
-						];
+				console.log("Testing: seeing if we can snoop this file for a pallet");
+				const dataView = new DataView(arrayBuffer, 0);
+				const sequence = [];
+				const completedSequences = [];
+
+				for(let i = 0; i < arrayBuffer.byteLength; i++){
+					const value = dataView.getUint8(i);
+					if(sequence.length < 768){
+						sequence.push(value);
+					} else if(sequence.length === 768){
+						sequence.shift();
+						sequence.push(value);
 					}
-
-					this.dom.output.textContent = JSON.stringify(pallet);
-					this.dom.pallet.appendChild(getTablePallet(pallet));
-				} else {
-					console.log("testing: seeing if we can snoop this file for a pallet")
-					const dataView = new DataView(arrayBuffer, 0);
-					let seq = 0;
-
-					for(let i = 0; i < arrayBuffer.byteLength; i++){
-						const value = dataView.getUint8(i);
-						if(value === 0){
-							seq += 1;
-							if(seq >= 3){
-								console.log(`found triple 0 ending at ${i}`);
-							}
-						} else {
-							seq = 0;
-						}
+					if (validatePallet(sequence)) {
+						completedSequences.push({
+							index: i - 767,
+							data: [...sequence]
+						});
 					}
-
-					console.log("Finished Search.");
 				}
+
+				const ul = document.createElement("ul");
+				for(let { index, data } of completedSequences){
+					const li = document.createElement("li");
+					const match = document.createElement("div");
+					const palletContainer = document.createElement("div");
+					palletContainer.classList.add("pallet-container");
+
+					match.textContent = `Found match at ${index}`;
+					li.appendChild(match);
+
+					const unpackedData = unpackPallet(data);
+					palletContainer.appendChild(getTablePallet(unpackedData))
+					const textData = document.createElement("textarea");
+					textData.innerHTML = JSON.stringify(unpackedData);
+					palletContainer.appendChild(textData);
+					li.appendChild(palletContainer);
+					ul.appendChild(li);
+				}
+
+				this.dom.output.appendChild(ul);
+				
+				console.log(`Done! Took ${performance.now() - start}ms`);
 			});
 		}
 		attributeChangedCallback(name, oldValue, newValue) {
@@ -85,3 +101,30 @@ customElements.define("pallet-extractor",
 		}
 	}
 );
+
+function validatePallet(sequence){
+	if(sequence.length !== 768) return false;
+
+	const set = new Set();
+	for(let i = 0; i < sequence.length; i += 3){
+		if(!(sequence[i] < 64 && sequence[i + 1] < 64 && sequence[i + 2] < 64)) return false;
+	}
+	return sequence[0] === 0
+		&& sequence[1] === 0
+		&& sequence[2] === 0
+		&& sequence[765] === 0x26
+		&& sequence[766] === 0
+		&& sequence[767] === 0x22;
+}
+
+function unpackPallet(bytes){
+	const pallet = [];
+	for (let i = 0; i < bytes.length; i += 3) {
+		pallet.push([
+			bytes[i] << 2,
+			bytes[i+1] << 2,
+			bytes[i+2] << 2
+		]);
+	}
+	return pallet;
+}

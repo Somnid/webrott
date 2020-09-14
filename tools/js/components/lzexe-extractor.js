@@ -1,6 +1,5 @@
-import { readFile, download, getName } from "../../../shared/js/file-utils.js";
+import { readFile, download, getName, getString } from "../../../shared/js/file-utils.js";
 import { getArray16 } from "../../../shared/js/file-utils.js";
-import { getString } from "../../../part13/source/js/lib/file-utils.js";
 import { dosHeaderToUint16Array } from "../../../shared/js/exe-utils.js";
 
 customElements.define("lzexe-extractor",
@@ -113,15 +112,15 @@ customElements.define("lzexe-extractor",
 				const relocationTable = makeRleTable(dataView, dosHeader, decompressedHeader, expansionHeader.version);
 				const data = unpack(dataView, dosHeader, compressionInfo);
 
+				decompressedHeader.minAlloc = dosHeader.maxAlloc !== 0
+					? dosHeader.minAlloc - (compressionInfo.increaseLoadSize + ((compressionInfo.sizeOfDecompressor + 16 -1) >> 4) + 9)
+					: dosHeader.minAlloc;
+				decompressedHeader.maxAlloc = dosHeader.maxAlloc !== 0
+					? dosHeader.maxAlloc !== 0xffff 
+						? dosHeader.maxAlloc - (dosHeader.minAlloc - decompressedHeader.minAlloc)
+						: dosHeader.maxAlloc
+					: dosHeader.maxAlloc;
 
-				const allocSize = ((dosHeader.lastSize + 16 - 1) >> 4) + ((dosHeader.countOfBlocks - 1) << 5) - dosHeader.headerSize + dosHeader.minAlloc;
-
-				if(dosHeader.maxAlloc !== 0){
-					decompressedHeader.minAlloc = allocSize - ((data.byteLength + 16 - 1) >> 4);
-				}
-				if(dosHeader.maxAlloc !== 0xffff){
-					decompressedHeader.maxAlloc -= dosHeader.minAlloc - decompressedHeader.minAlloc;
-				}
 				decompressedHeader.lastSize = data.byteLength + (decompressedHeader.headerSize << 4) & 0x1ff;
 				decompressedHeader.countOfBlocks = (data.byteLength + (decompressedHeader.headerSize << 4) + 0x1ff) >> 9;
 
@@ -172,13 +171,15 @@ function makeRleTable(dataView, dosHeader, decompressedHeader, version){
 			}
 
 			offset += span;
-			segment += (offset & 0b11110000) >> 4;
-			offset = offset & 0b00001111;
+			segment += (offset & ~0x0F) >> 4;  //bit masking with 0b11111111_11110000
+			offset = offset & 0x0F; //bit masking with 0b00000000_00001111
 			tableBody.push(offset);
 			tableBody.push(segment);
 			count += 1;
 		}
 		decompressedHeader.countOfRelocations = count;
+	} else {
+		throw "LZ90 not implemented. Sorry :(";
 	}
 	const endOfTable = relocationTableOffset + (tableBody.length * 2); // 2x because they are words
 	const bytesNeededToAlignToPage = 512 - (endOfTable % 512);
@@ -190,7 +191,7 @@ function makeRleTable(dataView, dosHeader, decompressedHeader, version){
 
 	decompressedHeader.headerSize = (relocationTableOffset + (tableBody.length * 2)) / 16;  //This points to the end of the data (page aligned), we divide by 16 because the header value is measured in unit paragraphs (16 bytes). No clue why this is part of the header size.
 
-	return new Uint16Array(...tableBody);
+	return new Uint16Array(tableBody);
 }
 
 //Bitstream with a 16-bit buffer, reads a word at a time but can also return bytes (this is more so I can use this class to hold the index into the dataView instead of syncing it with an external index for reading bytes in the decompression alogrithm)
@@ -250,9 +251,9 @@ function unpack(dataView, dosHeader, compressionInfo){
 		} else {
 			span = bitStream.getUnbufferedByte();
 			length = bitStream.getUnbufferedByte();
-			span = span | (((length & 0b11111000) << 5) | 0xe000); //0xe000 is 0b11100000_00000000
+			span = span | (((length & ~0x7) << 5) | 0xe000); //0xe000 is 0b11100000_00000000
 			span = twosCompliment16(span); //the above value will always be negative
-			length = (length & 0b00000111) + 2;
+			length = (length & 0x07) + 2;
 			if(length === 2){
 				length = bitStream.getUnbufferedByte();
 				if(length === 0) break; //end of module
@@ -265,7 +266,7 @@ function unpack(dataView, dosHeader, compressionInfo){
 		}
 	}
 
-	return new Uint16Array(outBody);
+	return new Uint16Array(new Uint8Array(outBody).buffer);
 }
 
 //Reconstructs a signed number from an unsigned number as javascript doesn't have these concepts
