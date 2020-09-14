@@ -43,11 +43,6 @@ const dosHeader = {
 	codeSegment: dataView.getUint16(22, true), //initial (relative) CS value
 	relocationTableOffset: dataView.getUint16(24, true), //address of relocation table
 	overlayIndex: dataView.getUint16(26, true), //overlay index
-	reserved1: getArray16(dataView, 28, 4), //reserved
-	oemId: dataView.getUint16(32, true), //OEM identifier
-	oemInfo: dataView.getUint16(34, true), //OEM info
-	reserved2: getArray16(dataView, 36, 10), //reserved
-	peOffset: dataView.getUint32(56, true) //offset to PE header
 };
 ```
 
@@ -55,14 +50,11 @@ There's already a lot of vocabulary here:
 
 - A `block` or `page` is a 512 byte chunk of data
 - A `paragraph` is a 16 byte chunk of data
-- A `relocation`
 - `SS` register is the stack segment which is an additional (4 bit) value to help address more than (2^16) bytes of RAM. (SS * 16 + SP) is the address of the top of the stack in memory.
 - `SP` register is the stack pointer, points to the top of the stack.
 - `IP` register is the instruction pointer, points to the current instruction
-- `CS` register is the code segment, a 16-bit register that "pages" the IP to you can have more than (2^16) instructions. (CS * 16 + IP) is the address of the current instruction.
+- `CS` register is the code segment, a 16-bit register that "pages" the IP so you can have more than (2^16) instructions. (CS * 16 + IP) is the address of the current instruction.
 - `overlay` is like a traditional memory page.  Overlays get swapped in and out from disk to overcome memory constraints.  This usually zero meaning it's the main segment/program.
-- `OEM` or Original Equipment Manufacturer.  This is some hardware-centric metadata, at the time there could be hardware specific stuff going on.
-- `peOffset` the offset to the "portable executable" part of the EXE.  This is wraps up the executable code and lets the OS know how to run it.  This value is often called `e_lfanew`.  I haven't figured out why.
 - `relocation table` is a table that points to all the static addresses in the instructions to execute.  Since the program can be loaded anywhere in memory static addresses need to be updated with an offset.  Entries in the table are made up of 2 16-bit values and there are `countOfRelocations` many of them, the first is the offset and the second is the segment where the instruction to update is located.  If we were running this, we would need to jump to each location and add the memory offset from which the program started to the value there.
 
 Immediately following is the expansion header:
@@ -77,35 +69,41 @@ const expansionHeader = {
 };
 ```
 
-`version` here is what is usually documented as "reserved" space.  `LZEXE` puts it's version signature here (either `LZ90` or `LZ91`).
+- `version` here is what is usually documented as "reserved" space.  `LZEXE` puts it's version signature here (either `LZ90` or `LZ91`).
+- `OEM` or Original Equipment Manufacturer.  This is some hardware-centric metadata, at the time there could be hardware specific stuff going on.
+- `peOffset` the offset to the "portable executable" part of the EXE.  This is wraps up the executable code and lets the OS know how to run it.  This value is often called `e_lfanew`.  I haven't figured out why.
 
 First we read the file and see if it is infact compressed by verifying header data is consistent with that of an LZEXE compressed executable, easy enough.  Then things get a little interesting.  We need to jump to where the data is and read another header.  In the source code we see `fpos=(long)(ihead[0x0b]+ihead[4])<<4`.  This translated is `(dosHeader.codeSegment + dosHeader.headerSize) * 16`.  My hazy understanding would be that the code segment offset (remember, it's multiplied by 16 and added to the instruction pointer which should start at 0) is where the actual code starts.  However, this offset only only applies after reading the header rather than from 0 (I guess because you need to read the CS value before you jump? IDK). `headerSize` is measured in paragraphs so we multiply that by 16 too.
 
-The relocations table:
+The relocation table
+--------------------
 
 We read one byte from the buffer, this is the "span".
-	- If it's a 0, read 16-bits, this is the new span
-		- If the new span is 0 we increment the segment by 0x0fff.  Code Segments are 20-bit addressable values, so this indicates we need to advance to the next segment.
-		- If the new span is 1 then we're done.
-	- Add span to offset (offset starts at 0)
-	- The top 4-bits of the offset are added to the segment
-	- The true offset is the bottom 4-bits of the offset value
-	- Write the offset then the segment as 16-bit values
+- If it's a 0, read 16-bits, this is the new span
+	- If the new span is 0 we increment the segment by 0x0fff.  Code Segments are 20-bit addressable values, so this indicates we need to advance to the next segment.
+	- If the new span is 1 then we're done.
+- Add span to offset (offset starts at 0)
+- The top 4-bits of the offset are added to the segment
+- The true offset is the bottom 4-bits of the offset value
+- Write the offset then the segment as 16-bit values
 
 Then pad to align with the page boundary.
 
 Especially without a lot of knowledge in this area it's hard to tell what it's trying to do but it's clearly compressing the table. Beneath the table is the compressed source. When decompressing the shareware `BLAKE_AOG.exe`, the resulting output relocation table ends at byte 14999 and 360 bytes of padding are added afterward to align to the page boundary. So 15360 is where the the code will start.
 
+Unpacking
+---------
+
 Unpacking is a little more intuitive as it's similar to the Carmack encoding we saw earlier.  We read in 16 bits which happens to be a bunch of control instructions for how to read the next few bytes.  In the source code there's a buffer that fills up and then gets written out when it hits 0x4000 (16384) bytes, we don't need to maintain that since we're just going to buffer the whole thing (streaming to files isn't something web does yet anyway at the time of writing).
 
 We read one bit from the buffer.
-	- If it's 1, then we write the next byte to the destination file
-	- Read another bit, 
-		- if it's 0, we read the next 2 bits and add 2, this will be the length (the smallest length is 2), and then we read the next byte and add 0xff.  This value is *signed* so it will always be negative as the highest bit is on.  To get the true value we need to take the twos compliment (there's probably a simplification here but I didn't think of it). This is the span, or the offset from the front of the output buffer.
-		- otherwise we read the next byte, this is the span.  Then we read the next byte, this is the length.  In this case we're offsetting more than 256 so the top 5 bits of length appended as the high bits on span creating a 21-bit value. In the source you'll see them use `~0x07` which is fancy way to say `0b11111000` (248) as it's a bitwise not of `0x07` `0b00000111`.  This is OR'd with `0xe000` which is a 16-bit value where the last 3 bits are on.  So we effectively make a 16-bit negative number and we'll need to take the two's compliment to get it back to normal.  Then we take the lower 3-bits of length and add 2 to them (why exactly this + 2 exists is not clear to me).  
-			- If the length (before adding 2) was 0, then we read an entire byte and that becomes the length.  This means the shortest span length is 3. 
-				- If the second length byte is read and is 0 we're done, if it's 1 then we start the loop again, otherwise we add 1 (again the extra adds to length are weird to me).
-	- Then we take the span as an offset from the end of the output and read length bytes back on to the front of it.
+- If it's 1, then we write the next byte to the destination file
+- Read another bit, 
+	- if it's 0, we read the next 2 bits and add 2, this will be the length (the smallest length is 2), and then we read the next byte and add 0xff.  This value is *signed* so it will always be negative as the highest bit is on.  To get the true value we need to take the twos compliment (there's probably a simplification here but I didn't think of it). This is the span, or the offset from the front of the output buffer.
+	- otherwise we read the next byte, this is the span.  Then we read the next byte, this is the length.  In this case we're offsetting more than 256 so the top 5 bits of length appended as the high bits on span creating a 21-bit value. In the source you'll see them use `~0x07` which is fancy way to say `0b11111000` (248) as it's a bitwise not of `0x07` `0b00000111`.  This is OR'd with `0xe000` which is a 16-bit value where the last 3 bits are on.  So we effectively make a 16-bit negative number and we'll need to take the two's compliment to get it back to normal.  Then we take the lower 3-bits of length and add 2 to them (why exactly this + 2 exists is not clear to me).  
+		- If the length (before adding 2) was 0, then we read an entire byte and that becomes the length.  This means the shortest span length is 3. 
+			- If the second length byte is read and is 0 we're done, if it's 1 then we start the loop again, otherwise we add 1 (again the extra adds to length are weird to me).
+- Then we take the span as an offset from the end of the output and read length bytesback on to the front of it.
 
 After this it's just a matter of fixing up the headers with the correct values.  Well, kinda, I didn't actually get it working completely and the debugging got really tedius so we'll need to come up with a plan for that.
 
