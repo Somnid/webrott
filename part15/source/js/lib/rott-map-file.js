@@ -5,7 +5,7 @@ const mapSize = 64;
 const registeredLevelTag = 0x4344;
 const sharewareLevelTag = 0x4d4b;
 
-export class RtlFile {
+export class RottMapFile {
 	constructor(arrayBuffer) {
 		this.arrayBuffer = arrayBuffer;
 		this.dataView = new DataView(arrayBuffer);

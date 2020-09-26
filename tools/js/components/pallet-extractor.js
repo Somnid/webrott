@@ -1,6 +1,5 @@
-import { readFile } from "../../../shared/js/file-utils.js";
+import { readFile, download } from "../../../shared/js/file-utils.js";
 import { getTablePallet } from "../../../shared/js/image-utils.js";
-import { getExtension } from "../../../part12/source/js/lib/file-utils.js";
 
 customElements.define("pallet-extractor",
 	class extends HTMLElement {
@@ -88,6 +87,10 @@ customElements.define("pallet-extractor",
 					textData.innerHTML = JSON.stringify(unpackedData);
 					palletContainer.appendChild(textData);
 					li.appendChild(palletContainer);
+					const downloadButton = document.createElement("button");
+					downloadButton.addEventListener("click", () => download(new Blob([new Uint8Array(data)], { type: "application/octet-stream" }), "pallet.bin"));
+					downloadButton.textContent = "Download Pallet";
+					li.appendChild(downloadButton);
 					ul.appendChild(li);
 				}
 

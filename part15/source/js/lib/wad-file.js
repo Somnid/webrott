@@ -1,6 +1,6 @@
 import { getString } from "./file-utils.js";
 
-export class Wad {
+export class WadFile {
 	constructor(arrayBuffer){
 		this.arrayBuffer = arrayBuffer;
 		this.dataView = new DataView(arrayBuffer);
@@ -23,7 +23,7 @@ export class Wad {
 			index += 16;
 		}
 	}
-	get(name){
+	getByName(name){
 		name = name.padEnd(8, "\0");
 		const entry = this.entries.find(e => e.name.trim() === name.trim());
 		return entry 
@@ -31,7 +31,7 @@ export class Wad {
 			: null;
 	}
 	getType(){
-		if(this.get("PAL")) return "rott";
-		if(this.get("PLAYPAL")) return "doom";
+		if(this.getByName("PAL")) return "rott";
+		if(this.getByName("PLAYPAL")) return "doom";
 	}
 }

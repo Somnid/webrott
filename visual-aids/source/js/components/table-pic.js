@@ -25,7 +25,8 @@ customElements.define("table-pic",
 			this.shadowRoot.innerHTML = `
 				<link rel="stylesheet" href="../shared/css/system.css">
 				<style>
-					:host{ display: inline-grid; position: relative; grid-template-columns: 250px 1fr 250px;  }
+					:host{ display: none; position: relative; grid-template-columns: 250px 1fr 250px;  }
+					:host(.hydrated) { display: inline-grid; }
 					#output { grid-column: 1 / 4; grid-row: 1 / 1; }
 					table { border-spacing: 0; }
 					#output td { width: 32px; height: 32px; border: 1px solid green; }
@@ -113,7 +114,7 @@ customElements.define("table-pic",
 				loadImage = (await import("../../../../shared/js/doom-asset.js")).loadImage;
 			} else if (this.type === "rott"){
 				loadImage = (await import("../../../../shared/js/rott-asset.js")).loadSprite;
-			} else if (this.type === "wolf"){
+			} else if (this.type === "ted"){
 				loadImage = (await import("../../../../shared/js/wolf-asset.js")).loadSprite;
 			} else {
 				return;
@@ -123,7 +124,7 @@ customElements.define("table-pic",
 
 			const palletBuffer = await fetch(this.palletsrc).then(x => x.arrayBuffer());
 
-			const pallet = getPallet(palletBuffer, 256, this.type === "wolf" ? 4 : 1);
+			const pallet = getPallet(palletBuffer, 256, this.type === "ted" ? 4 : 1);
 			const table = getTableImage(bitmap, pallet, {
 				mapFunc: (td, col, row, color, index) => {
 					if(color){
@@ -138,6 +139,7 @@ customElements.define("table-pic",
 				}
 			});
 			this.dom.output.appendChild(table);
+			this.classList.add("hydrated");
 		}
 		attributeChangedCallback(name, oldValue, newValue) {
 			this[name] = newValue;
