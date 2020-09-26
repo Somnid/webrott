@@ -107,7 +107,7 @@ Aside: Bugs
 
 I spent about an hour pulling my hair out because the map would constantly autoscroll to the left and lists would not scroll properly.  I first thought it was a browser quirk but it happened in Firefox as well.  Then I assumed it was a stuck mouse button but using another mouse caused the same thing.  Then I noticed it happening in some other apps.  I unplugged my keyboard, still scrolling.  I tried out the asset-reader on another computer and it worked.  I rebooted and it still didn't.  Ultimately, the culprit was a bluetooth adaptor.  Yeah, apparently it can stuck...across reboots.  Who knew?  Unplugging and plugging it back in fixed it.  Sometimes those bugs you find can come from the weirdest places.
 
-Aside: Element Loading
-----------------------
+Aside: Custom Element Loading States
+------------------------------------
 
 The `table-pic` component used by the visual aids had a visual flaw when loading.  Since this takes non-trivial time to download and parse it would flicker as the element started in a compressed state and then expanded to the loaded image.  This is easy to fix.  We just need to start with a `display: none` on the `:host`, and then at the end of loading we add a class `hydrated` to the `:host` and set `:host(.hydrated)` back to the display value we want.  This isn't fullproof as it can still cause layout instability as it pushed things around (we'd need to precalculate the size to fix that) but for a simple page with no elements this works just fine. 
