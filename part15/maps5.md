@@ -93,7 +93,139 @@ The metal panel texture does look like it's in the right place.  At the back of 
 
 Well it's clear what happened.  These walls have indicies greater than 32 so checking the code above it appears we have to do some weird offsetting.  Defintinely not as intuitive as Wolfenstien.  There's a lot going on.
 
-At this point we have something reasonable but there's a lot of other topics to explore like masked walls, push walls, doors and actors.
+
+## Doors
+
+Walls cover a few ranges and there seem to be 20 total door types.  We can find these in `SetupDoors` in `RT_TED.c` but we can also trace that into `SpawnDoor` in `RT_DOOR.c` to find the textures used.
+
+- 33 (15 "SNDOOR")
+- 34 (16 "SNADOOR")
+- 35 (17 "SNKDOOR")
+- 90 (0, "RAMDOOR1")
+- 91 (1, "DOOR2")
+- 92 (2, "TRIDOOR1")
+- 93 (3, "TRIDOOR1")
+- 98 (8, "RAMDOOR1") 
+- 99 (9, "DOOR2")
+- 100 (10, "SDOOR4")
+- 101 (11, "SDOOR4")
+- 102 (12, "EDOOR")
+- 103 (13, "TRIDOOR1")
+- 104 (14, "SDOOR4")
+- 154 (18, "TNDOOR")
+- 155 (19, "TNADOOR")
+- 156 (20, "TNKDOOR")
+
+33-35 form the "Snake" door which is a 3 part door.  Unlike Wolfenstien doors can span multiple tiles. Same with 154-156 and "TN" (no clue what this stands for) door.  Doors assets have an interesting iamge setup.  If you had previously tried to open these in the asset loader, it would have crash on some of them.  Each door has 8 frames of animation plus a default.  The default image is a 64x64 bitmap, the animation frames are ROTT's Doom Image variant (eg they have "holes") so they need to be loaded differently.  Typically, the animation frames are suffixed A-H and the default has no letter, except for `TRIDOOR` and `RAMDOOR` which are suffixed 1-9 with 1 being the default.  I added some regexing to the asset loader to account for this but it's pretty annoying, there's no way to be sure what type we have based on the name alone.  You might even try to be clever and look at the file size since 64x64 bitmaps are always 4096 byes but `SDOOR4A` is exactly that size as well.  The only real way to know is by reading the whole WAD.  Doors appear between the marker lumps `DOORSTRT` and `DOORSTOP` and every 9th asset is the default.
+
+Strangely there are 20 indexed doors but only 11 indicies are used, some map to the same door and indicies 3-7 are simply left out.  Perhaps a casuality of development.  For the shareware version this leave us with exactly 6 types of doors.
+
+This gets pretty complicated to add to the map renderer.  The first this we need to do is grab all the door textures, and since our tiled images only take a tile map and a list of tiles we nee to lump them together with the walls.  However, due to the complex mapping above we need to be able to reduce these down to the indicies 1-6 then we'll then append them to the end of the list and add the offset of the number of wall assets.  This is important because I think the registered version has more walls and doors.  So instead of a list we extract a list of entries:
+
+```js
+export function extractStaticDoorEntries(wad) {
+	let isDoors = false;
+	const doors = [];
+	for (let i = 0; i < wad.entries.length; i++) {
+		const entry = wad.entries[i];
+
+		if (entry.name === "DOORSTOP") break;
+		if (isDoors) {
+			if (entry.size == 4096) {
+				const door = new DataView(wad.arrayBuffer, entry.offset, entry.size);
+				doors.push([trimString(entry.name), loadWall(door)]);
+				i += 8; //skip animation frames
+			}
+		}
+		if (entry.name === "DOORSTRT") isDoors = true;
+	}
+	return doors;
+}
+```
+
+This is because in addition to the asset, we want to know the index and the name.  Then when we are assembling the tile map, we first use a bunch of ifs to get the door index (0-20), convert that to a lump name, then use the lump name to index into the map of actual wall textures (0-5 for shareware) and finally add the count of wall textures to get the index into the tile list.  \*exhales\*
+
+`loadMap` now looks like this:
+```js
+export function loadMap(map, wallTextureCount = 105, doorTextureMap) {
+	const height = map[0].length;
+	const width = map[0][0].length;
+	const tileMap = allocBlockArray(height, width);
+
+	for (let row = 0; row < height; row++) {
+		for (let col = 0; col < width; col++) {
+			const value = map[0][row][col];
+
+			if(value >= 1 && value <= 32){
+				tileMap[row][col] = value - 1;
+			} else if(value >= 33 && value <= 35){ //snake door
+				tileMap[row][col] = wallTextureCount + doorTextureMap[doorIndexToName((value - 33) + 15)];
+			} else if(value >= 36 && value <= 45){
+				tileMap[row][col] = value - 4;
+			} else if(value === 46){
+				tileMap[row][col] = 73;
+			} else if (value >= 49 && value <= 71) {
+				tileMap[row][col] = value - 9;
+			} else if (value >= 80 && value <= 89){
+				tileMap[row][col] = value - 16;
+			} else if (value >= 90 && value <= 104){ //doors
+				tileMap[row][col] = wallTextureCount + doorTextureMap[doorIndexToName((value - 90))];
+			} else if (value >= 154 && value <= 156){ //doors
+				tileMap[row][col] = wallTextureCount + doorTextureMap[doorIndexToName((value - 154) + 18)];
+			}
+		}
+	}
+
+	return tileMap;
+}
+```
+With the hardcoded index-to-lump-name:
+```js
+function doorIndexToName(value){
+	switch(value){
+		case 0:
+		case 8:
+			return "RAMDOOR";
+		case 1:
+		case 9:
+			return "DOOR2";
+		case 2:
+		case 3:
+		case 13:
+			return "TRIDOOR1";
+		case 10:
+		case 11:
+		case 14:
+			return "SDOOR4";
+		case 12:
+			return "EDOOR";
+		case 15:
+			return "SNDOOR";
+		case 16:
+			return "SNADOOR";
+		case 17:
+			return "SNKDOOR";
+		case 18:
+			return "TNDOOR";
+		case 19:
+			return "TNADOOR";
+		case 20:
+			return "TNKDOOR";
+		default:
+			throw new Error(`Door index ${value} does not coorispond to a ROTT door asset.`)
+	}
+}
+```
+And we just need to assemble the asset-name-to-index in `asset-reader.js`: `const doorIndexMap = Object.fromEntries(doors.map(([key, value], index) => [key, index]));`
+
+After multiple layers of mapping we have what we want.  Door textures:
+
+![snake-door](snake-door.png)
+
+So we have wall texture and door textures. ROTT has a lot more going on though, we're not even finished with layer 0.  We still need to figure out push walls, wander walls, and masked walls.
+
+For reference, I've create a table of the values found in layer 0 and what they mean: [rott plane 0 tiles](../appendix/rott-plane0-tiles.md)
+
 
 Note on File Conventions
 ------------------------

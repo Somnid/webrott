@@ -28,7 +28,7 @@ export class TedMap extends HTMLElement {
 				<link rel="stylesheet" href="css/system.css">
 				<style>
 					:host { display: grid; }
-					#table-container { grid-row: 1 / 1; grid-column: 1 / 1; }
+					#table-container { grid-row: 1 / 1; grid-column: 1 / 1;  z-index: 1; }
 					#canvas-container { grid-row: 1 / 1; grid-column: 1 / 1; }
 					table { border-spacing: 0px; }
 					td { padding: 0px; width: 64px; height: 64px; min-width: 64px; min-height: 64px; text-align: center; }
@@ -83,6 +83,7 @@ function renderGrid(map, isSkeleton = false){
 			const value = map[row][col];
 			td.dataset.x = col;
 			td.dataset.y = row;
+			td.dataset.value = value;
 			if(isSkeleton){
 				if(value && value < 89){
 					td.style.backgroundColor = "#000";

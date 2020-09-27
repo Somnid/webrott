@@ -183,14 +183,23 @@ export class AssetReader extends HTMLElement {
 			}
 			case "rott-level": {
 				const { TedMap } = await import("./ted-map.js");
-				const { extractWalls, getPallets, loadMap } = await import("../lib/rott-asset.js");
+				const { extractWalls, extractStaticDoorEntries, getPallets, loadMap } = await import("../lib/rott-asset.js");
+				const wad = this.files.get("wad");
+				let walls;
+				let doors;
 
 				const tedMap = new TedMap();
-				tedMap.setMap(loadMap(file.getMap(assetId)));
-				const wad = this.files.get("wad");
-				if(wad){
-					tedMap.setWallBitmaps(extractWalls(wad));
+
+				if (wad) {
+					walls = extractWalls(wad);
+					doors = extractStaticDoorEntries(wad);
+					const doorIndexMap = Object.fromEntries(doors.map(([key, value], index) => [key, index]));
+					tedMap.setMap(loadMap(file.getMap(assetId), walls.length, doorIndexMap));
+					const doorTextures = doors.map(([key, value]) => value);
+					tedMap.setWallBitmaps([...walls, ...doorTextures]);
 					tedMap.setPallet(getPallets(wad)[0]);
+				} else {
+					tedMap.setMap(loadMap(file.getMap(assetId)));
 				}
 
 				/*
