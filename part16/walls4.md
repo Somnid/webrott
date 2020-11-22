@@ -47,7 +47,7 @@ typedef enum
  }
  thingtype;
 ```
-When SpawnMaskedWall is called, it creates a `maskedwallobject_t`, adds it to a list of maskedwallobjects with a `thingtype` `MWALL`.  It then places the index of the object at the desired x, y OR'd with 0xc000 (top 2 bits on) so it can be referenced.  It then tries to figure out the orientation. If the direction contains a masked wall we used value `2`, if it's a regular wall `1` otherwise `0`.  If two sides contain walls (`1` or `2`) then it orients the masked wall to span between them (eg up=1 down=1 then it's vertical, imagine a pane of glass stretching between 2 walls vertically).  The priority is walls, masked walls, and then having one bordering entity vertical, then horizontal.  Then it reads the sides of the masked wall, so in the case of a vertical pane of glass, we want the right and left.  These should be areas. "Areas" in ROTT are anything in the wall plane (0) that have a value greater than or equal to `107`.  These are used to calculate line of sight and sound propagation.  For example, if I shoot a weapon in an area, all enemies in that area should be alerted.  For masked walls, we need to connect 2 areas.  So if area 1 is on the left and area 2 is one the right, enemies in area 2 should be able to see and hear what goes on in area 1.  The connections are stored in a 2d array lookup table (hardcoded size 47x47) and the lookups are bidirectional so there is entry 1->2 and 2->1.  These are stored as integers, not booleans.  This is because it's possible to have multiple connections between areas, say a glass wall and a door.  So for each entry we increment by 1.  This really comes to play with doors as an open door contributes +1 but a closed door contributes 0.  In the case of a masked wall, the connection is always open so we increment it by 1 and it will never decrement.
+When SpawnMaskedWall is called, it creates a `maskedwallobject_t`, adds it to a list of maskedwallobjects with a `thingtype` `MWALL`.  It then places the index of the object at the desired x, y OR'd with 0xc000 (top 2 bits on) in tilemap plane 0 so it can be referenced.  It then tries to figure out the orientation of the wall.  To do so it checks the cardinal directions. If the direction contains a masked wall, it associates with that direction value `2`, if it's a regular wall `1` otherwise `0`.  If two sides of the masked wall contain walls (`1` or `2`) then it orients the masked wall to span between them (eg up=1 down=1 then it's vertical, imagine a pane of glass stretching between 2 walls north to south).  If it has trouble placing things, the priority is walls, masked walls, and then having a single bordering wall vertical, then horizontal.  Then it reads the sides of the masked wall, so in the case of a vertical pane of glass, we want the right and left.  These should be areas. "Areas" in ROTT are anything in the wall plane (0) that have a value greater than or equal to `107`.  These are used to calculate line of sight and sound propagation.  For example, if I shoot a weapon in an area, all enemies in that area should be alerted.  For masked walls, we need to connect 2 areas.  So if area 1 is on the left and area 2 is one the right, enemies in area 2 should be able to see and hear what goes on in area 1.  The connections are stored in a 2d array lookup table (hardcoded size 47x47) and the lookups are bidirectional so there is entry 1->2 and 2->1.  These are stored as integers, not booleans.  This is because it's possible to have multiple connections between areas, say a glass wall and a door.  So for each entry we increment by 1.  This really comes to play with doors as an open door contributes +1 but a closed door contributes 0.  In the case of a masked wall, the connection is always open so we increment it by 1 and it will never decrement.
 
 It then checks if layer 2 contains a value 1 or 4-9 and layer 0 contains 21.  This indicates the platform is a metal platform (more on this later).  Then we get to the interesting part, the type of masked wall.  Each wall has 4 textures: side, middle, above, bottom.  There's a bunch of ifdefs to downgrade textures for shareware but we can ignore that for now.
 
@@ -195,9 +195,10 @@ Unfortunately, there's no way to tell what you are getting by just inspecting th
 - Else
   - Texture is translucent
 
-The asset loader is too complicated so let's try something simpler.  We can use hints to figure out what it is but we fallback if it doesn't work.  I created a new file `exception-utils.js` that has a function to make this easier:
+The asset loader is already too complicated so let's try something simpler.  We can use hints to figure out what it is but we fallback if it doesn't work.  I created a new file `exception-utils.js` that has a function to make this easier:
 
 ```js
+//exception-tools.js
 export function multiTry(...functionsToTry) {
 	let currentException;
 	for (const func of functionsToTry) {
@@ -215,6 +216,7 @@ export function multiTry(...functionsToTry) {
 Then in `wad-asset` all we do is check whether or not it's a ROTT wad and run this function:
 
 ```js
+//wad-asset.js
 function getRottImageAsset(wad, dataView){
 	if(dataView.buffer.byteLength === 4096){
 		return multiTry(
@@ -232,4 +234,6 @@ function getRottImageAsset(wad, dataView){
 }
 ```
 
-If it looks like a wall from the size we try that first to speed things up, otherwise we try a normal `patch_t` sprite or a `transpatch_t` transparent sprite.  This will add a little bit of flicker as it need to try to fairly heavy algorithms but it's not bad enough that I want to fix it now.  With this, all ROTT image assets should load in the preview without explict name mapping shenanigans.
+If it looks like a wall from the size we try that first to speed things up, otherwise we try a normal `patch_t` sprite or a `transpatch_t` transparent sprite.  This will add a little bit of flicker as it need to try some fairly heavy algorithms but it's not bad enough that I want to fix it now.  With this, all ROTT image assets should load in the preview without explict name mapping shenanigans.
+
+Not much code but a lot of research this time.  Next time I'm hoping to draw them into our map representation.
