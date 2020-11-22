@@ -78,6 +78,8 @@ The above texture is 1 wall height unit at the top of the wall.
 The bottom texture is 1 wall height unit at the bottom of the wall
 
 
+### Wall Types
+
 | Value | Type | Side | Middle | Above | Bottom |
 |-------|------|------|--------|-------|--------|
 | 0 | mw_peephole | SIDE21 | ABOVEM4A | ABOVEM4 | PEEPMASK |
