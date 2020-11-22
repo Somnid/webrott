@@ -46,7 +46,7 @@
 | 170 | Dog Door (NonDog Blocking, Weapon Blocking, Masked) |
 | 171 | Peephole (Weapon Blocking, Blocking, Masked) |
 | 172 | Exit Arch (Bottom Passable, Masked) |
-| 173 | Secret Exit Arch (Blocking, Masked) |
+| 173 | Secret Exit Arch (Bottom Passable, Masked) |
 | 174 | Entry Gate (Blocking, Masked) |
 | 157 | Hi Switch Off (Blocking, Masked) |
 | 175 | Hi Switch On (Blocking, Masked) |

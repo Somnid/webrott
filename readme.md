@@ -29,16 +29,18 @@ Table of Contents
 - [Part 13 - EXE Compression](part13/compression.md) (Blake Stone: Aliens of Gold)
 - [Part 14 - Reading Pallets 2: EXE Compression, Binary Diffing, and Pallet Sniffing](part14/pallets2.md) (Blake Stone: Aliens of Gold)
 - [Part 15 - Reading Maps 5: ROTT Textures](part15/maps5.md) (Blake Stone: AOG, ROTT)
+- [Part 16 - Reading Walls 4: Masked Walls](part16/walls4.md) (ROTT)
 - [Appendix: Intepreting Binary Data](appendix/datatypes.md)
 - [Appendix: ROTT Plane 0 Tiles](appendix/rott-plane0-tiles.md)
 - [Appendix: ROTT Plane 1 Tiles](appendix/rott-plane1-tiles.md)
+- [Appendix: ROTT Plane 2 Tiles](appendix/rott-plane2-tiles.md)
 
 Working with the code
 ---------------------
 
-Code is copy-pasted per chapter so it's easy to reference (and diff) without switching branches.  I intend to keep this until it becomes unmanageable.  In general, code in previous will not be modified in updates to preserve the journey of learning.  I'll only fix it if it plain doesn't work as originally intended.  There are other folders with visual aids, data and shared files like CSS styles.  These will be updated as I add features and won't be subject to lots of duplication.  I will review previous posts to see if I can explain things better or correct mistakes that might mislead readers.  While I want it to read like a jounery, it's more important that any info is accurate so others can use it as a guide.
+Code is copy-pasted per chapter so it's easy to reference (and diff) without switching branches.  I intend to keep this setup until it becomes unmanageable.  In general, code in previous chapters will not be modified in updates to preserve the journey of learning.  I'll only fix it if it plain doesn't work as originally intended.  There are other folders with visual aids, data and shared files like CSS styles.  These will be updated as I add features and won't be subject to lots of duplication.  I will review previous posts to see if I can explain things better or correct mistakes that might mislead readers.  While I want it to read like a jounery, it's more important that any info is accurate so others can use it as a guide.
 
-To run the project, simply run `npm start` (you must install node: https://nodejs.org/en/) in the root directory using the terminal. Node is only required to run the basic dev server, and all it does is serve static files to the web browser on localhost. You can use your own if you have a different one you like. I'm not going to use a build process or framework, everything is vanilla js, but I will leverage web components so you may want to brush up on those if you are unfamilar.  I also will not be using existing libraries or transpiling code, everything is written from scratch using VSCode and debugged in Chrome (browser support is not a priority but it's very unlikely I'll utilize APIs that don't have wide support). I generally won't dive as deep into the js parts, so definitely checkout MDN to understand how some of these APIs work. I'm also going for readability over performance because this is a learning exercise. 
+To run the project, simply run `npm start` (you must install node: https://nodejs.org/en/) in the root directory using the terminal. Node is only required to run the basic dev server, and all it does is serve static files to the web browser on localhost. You can use your own static server if you have a different one you like. I'm not going to use a build process or framework, everything is vanilla js, but I will leverage web components so you may want to brush up on those if you are unfamilar.  I also will not be using existing libraries or transpiling code, everything is written from scratch using VSCode and debugged in Chrome (browser support is not a priority but it's very unlikely I'll utilize APIs that don't have wide support). I generally won't dive as deep into the js parts, so definitely checkout MDN to understand how some of these APIs work. I'm also going for readability over performance because this is a learning exercise. 
 
 Anyway, once the file server is running, just navigate to the html file you want.
 
